@@ -41,7 +41,7 @@ app.use(session({
 }))
 
 // Configure routes
-app.use(routes)
+app.use('/api', routes)
 
 // Connect to database and start the server
 mongoose.connect(MONGO_URI)

@@ -6,7 +6,11 @@ const STATUS = ['Not Started', 'In Progress', 'Completed', 'On Hold', 'Cancelled
 
 const projectSchema = new Schema({
   name: { type: String, required: true },
-  user: { type: Schema.Types.ObjectId, required: true },
+  owner: { type: Schema.Types.ObjectId, required: true },
+  members: [{
+    user: { type: Schema.Types.ObjectId, required: true },
+    role: { type: String, required: true }
+  }],
   client: { type: String, required: true },
   description: { type: String, required: true },
   deadline: { type: Date, required: true },
