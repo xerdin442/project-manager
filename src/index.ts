@@ -12,9 +12,10 @@ import routes from '../src/routes/index'
 import sessionDts from '../types/session';
 
 const app = express()
+
+// Configure environment variables
 dotenv.config();
 
-// Initialize environment variables
 const MONGO_URI = process.env.MONGO_URI
 const PORT = process.env.PORT || 3000
 const SESSION_SECRET = process.env.SESSION_SECRET
