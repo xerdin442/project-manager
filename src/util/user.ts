@@ -1,6 +1,6 @@
 import { User } from '../models/user';
 
-export const getAllUsers = () => {
+export const getAll = () => {
   return User.find()
 }
 
@@ -10,6 +10,10 @@ export const getUserById = (id: string) => {
 
 export const getUserByEmail = (email: string) => {
   return User.findOne({ email: email }).select('+password');
+}
+
+export const updateUser = (id: string, values: Record<string, any>) => {
+  return User.findByIdAndUpdate(id, values, { new: true })
 }
 
 export const deleteUserById = (id: string) => {

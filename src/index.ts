@@ -6,15 +6,20 @@ import compression from 'compression';
 import mongoose from 'mongoose';
 import connectMongoDBSession from 'connect-mongodb-session';
 import session from 'express-session';
-import crypto from 'crypto';
+import dotenv from 'dotenv';
 
+import routes from '../src/routes/index'
 import sessionDts from '../types/session';
 
 const app = express()
+dotenv.config();
 
-const MONGO_URI = 'mongodb+srv://mudianthonio27:quadrant27@cluster0.se8ewxi.mongodb.net/project-manager?retryWrites=true&w=majority&appName=Cluster0'
-const sessionSecret = crypto.randomBytes(64).toString('hex');
+// Initialize environment variables
+const MONGO_URI = process.env.MONGO_URI
+const PORT = process.env.PORT || 3000
+const SESSION_SECRET = process.env.SESSION_SECRET
 
+// Initialize and configure middlewares
 app.use(cors({ credentials: true, origin: 'http://localhost:3000' }))
 app.use(compression())
 app.use(bodyParser.json())
@@ -27,7 +32,7 @@ const store = new MongoDBStore({
   collection: 'sessions'
 })
 app.use(session({
-  secret: sessionSecret,
+  secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   store: store,
@@ -35,12 +40,12 @@ app.use(session({
 }))
 
 // Configure routes
-
+app.use(routes)
 
 // Connect to database and start the server
 mongoose.connect(MONGO_URI)
   .then(() => {
-    app.listen(3000)
+    app.listen(PORT)
     console.log('Server is running on port 3000')
   })
   .catch(err => console.log(err))
