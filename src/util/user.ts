@@ -20,15 +20,25 @@ export const createUser = async (values: Record<string, any>) => {
   return user.toObject();
 }
 
-export const updateUser = (id: string, values: Record<string, any>) => {
+export const updateProfile = (id: string, values: Record<string, any>) => {
   return User.findByIdAndUpdate(id, values, { new: true })
 }
 
-export const deleteUserById = (id: string) => {
+export const deleteUser = (id: string) => {
   return User.deleteOne({ _id: id });
 }
 
-export const getMemberProjects = async (id: string) => {
+export const getProjectsByRole = async (id: string, role: string) => {
+  const projects = await Project.find()
+
+  const projectsByRole = projects.filter(project => {
+    return project.members.filter(member => id === member.user.toString() && role === member.role);
+  })
+
+  return projectsByRole;
+}
+
+export const getUserProjects = async (id: string) => {
   const projects = await Project.find()
 
   const userProjects = projects.filter(project => {
@@ -38,24 +48,14 @@ export const getMemberProjects = async (id: string) => {
   return userProjects;
 }
 
-export const getAdminProjects = async (id: string) => {
-  const projects = await Project.find()
-
-  const userProjects = projects.filter(project => id === project.owner.toString())
-
-  return userProjects;
-}
-
-export const getRemindersById = async (id: string) => {
+export const getReminders = async (id: string) => {
   const user = await getUserById(id)
   
   const reminders = user.reminders.map(async (reminder) => {
-    const populatedReminder = await (await reminder.populate('sender', 'username profileImage')).populate('project', 'name deadline');
-
-    return populatedReminder;
+    // reminder logic
   })
 
   return reminders;
 }
 
-export const sendReminderToMember = async () => {}
+export const sendReminder = async () => {}
