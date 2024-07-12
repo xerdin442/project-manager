@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { deleteUserById, getAll, getRemindersById, getUserProjectsById, updateUser } from '../util/user';
+import { deleteUserById, getAll, getRemindersById, getMemberProjects, updateUser, getAdminProjects } from '../util/user';
 
 export const getAllUsers = async (req: express.Request, res: express.Response) => {
   try {
@@ -41,13 +41,36 @@ export const deleteUser = async (req: express.Request, res: express.Response) =>
   }
 }
 
-export const getUserProjects = async (req: express.Request, res: express.Response) => {
+export const getProjectsAsMember = async (req: express.Request, res: express.Response) => {
   try {
     const { userId } = req.params
+    const { member } = req.query
 
-    const userProjects = await getUserProjectsById(userId)
+    if (member !== 'true') {
+      return res.status(403).send('Not allowed to view projects')
+    }
 
-    return res.status(200).json(userProjects).end()
+    const memberProjects = await getMemberProjects(userId)
+
+    return res.status(200).json(memberProjects).end()
+  } catch (error) {
+    console.log(error)
+    return res.sendStatus(500)
+  }
+}
+
+export const getProjectsAsAdmin = async (req: express.Request, res: express.Response) => {
+  try {
+    const { userId } = req.params
+    const { admin } = req.query
+
+    if (admin !== 'true') {
+      return res.status(403).send('Not allowed to view projects')
+    }
+
+    const adminProjects = await getAdminProjects(userId)
+
+    return res.status(200).json(adminProjects).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)

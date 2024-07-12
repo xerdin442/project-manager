@@ -7,8 +7,8 @@ const userSchema = new Schema({
   profileImage: { type: String, required: true },
   password: { type: String, required: true, select: false },
   reminders: [{
-    project: { type: Schema.Types.ObjectId, required: true },
-    sender: { type: Schema.Types.ObjectId, required: true },
+    project: { type: Schema.Types.ObjectId, required: true, ref: 'Project' },
+    sender: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
     message: { type: String, required: true }
   }],
 })

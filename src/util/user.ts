@@ -28,12 +28,20 @@ export const deleteUserById = (id: string) => {
   return User.deleteOne({ _id: id });
 }
 
-export const getUserProjectsById = async (id: string) => {
+export const getMemberProjects = async (id: string) => {
   const projects = await Project.find()
 
   const userProjects = projects.filter(project => {
     return project.members.filter(member => id === member.user.toString());
   })
+
+  return userProjects;
+}
+
+export const getAdminProjects = async (id: string) => {
+  const projects = await Project.find()
+
+  const userProjects = projects.filter(project => id === project.owner.toString())
 
   return userProjects;
 }
@@ -49,3 +57,5 @@ export const getRemindersById = async (id: string) => {
 
   return reminders;
 }
+
+export const sendReminderToMember = async () => {}
