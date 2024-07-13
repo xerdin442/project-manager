@@ -1,5 +1,4 @@
-import mongoose from "mongoose";
-const { Schema } = mongoose
+import mongoose, { Schema } from "mongoose";
 
 // Define the valid 'priority' and 'status' values
 const STATUS: string[] = ['To-do', 'Completed', 'Awaiting Feedback', 'Deferred']

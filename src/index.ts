@@ -6,12 +6,14 @@ import compression from 'compression';
 import mongoose from 'mongoose';
 import connectMongoDBSession from 'connect-mongodb-session';
 import session from 'express-session';
+import dotenv from 'dotenv';
 
 import routes from '../src/routes/index';
-import * as env from '../src/config/secrets'
 import sessionDts from '../types/session';
 
 const app = express()
+
+dotenv.config();
 
 // Initialize and configure middlewares
 app.use(cors({ credentials: true, origin: 'http://localhost:3000' }))
@@ -22,11 +24,11 @@ app.use(cookieParser())
 // Initializing session middlleware
 const MongoDBStore = connectMongoDBSession(session);
 const store = new MongoDBStore({
-  uri: env.MONGO_URI,
+  uri: process.env.MONGO_URI,
   collection: 'sessions'
 })
 app.use(session({
-  secret: env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   store: store,
@@ -37,9 +39,9 @@ app.use(session({
 app.use('/api', routes)
 
 // Connect to database and start the server
-mongoose.connect(env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI)
   .then(() => {
-    app.listen(env.PORT)
+    app.listen(process.env.PORT)
     console.log('Server is running on port 3000')
   })
   .catch(err => console.log(err))
