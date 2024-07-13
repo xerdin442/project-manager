@@ -1,9 +1,9 @@
-import express from 'express';
+import { Request, Response } from 'express';
 
-import * as Project from '../util/project';
-import { getUserById } from '../util/user';
+import * as Project from '../services/project';
+import { getUserById } from '../services/user';
 
-export const getAll = async (req: express.Request, res: express.Response) => {
+export const getAll = async (req: Request, res: Response) => {
   try {
     const projects = await Project.getAll()
 
@@ -14,7 +14,7 @@ export const getAll = async (req: express.Request, res: express.Response) => {
   }
 }
 
-export const createProject = async (req: express.Request, res: express.Response) => {
+export const createProject = async (req: Request, res: Response) => {
   try {
     const { name, client, description, deadline } = req.body
     const user = await getUserById(req.params.userId)
@@ -37,12 +37,12 @@ export const createProject = async (req: express.Request, res: express.Response)
   }
 }
 
-export const updateProject = async (req: express.Request, res: express.Response) => {
+export const updateProject = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
-    const { name, client, description, deadline } = req.body
+    const { name, client, description, deadline, status } = req.body
 
-    const project = await Project.updateProject(projectId, { name, client, description, deadline })
+    const project = await Project.updateProject(projectId, { name, client, description, deadline, status })
 
     return res.status(200).json(project).end()
   } catch (error) {
@@ -51,20 +51,20 @@ export const updateProject = async (req: express.Request, res: express.Response)
   }
 }
 
-export const deleteProject = async (req: express.Request, res: express.Response) => {
+export const deleteProject = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
 
-    const deletedProject = await Project.deleteProject(projectId)
+    await Project.deleteProject(projectId)
 
-    return res.status(200).json(deletedProject).end()
+    return res.status(200).json({ message: 'Project deleted successfully' }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
   }
 }
 
-export const getAllMembers = async (req: express.Request, res: express.Response) => {
+export const getAllMembers = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
 
@@ -77,7 +77,7 @@ export const getAllMembers = async (req: express.Request, res: express.Response)
   }
 }
 
-export const getMembers = async (req: express.Request, res: express.Response) => {
+export const getMembers = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
     const { role } = req.query
@@ -95,7 +95,7 @@ export const getMembers = async (req: express.Request, res: express.Response) =>
   }
 }
 
-export const getAdmins = async (req: express.Request, res: express.Response) => {
+export const getAdmins = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
     const { role } = req.query
@@ -113,7 +113,7 @@ export const getAdmins = async (req: express.Request, res: express.Response) => 
   }
 }
 
-export const addAdmin = async (req: express.Request, res: express.Response) => {
+export const addAdmin = async (req: Request, res: Response) => {
   try {
     const { projectId, userId } = req.params
 
@@ -126,13 +126,27 @@ export const addAdmin = async (req: express.Request, res: express.Response) => {
   }
 }
 
-export const deleteMember = async (req: express.Request, res: express.Response) => {
+export const deleteMember = async (req: Request, res: Response) => {
   try {
     const { projectId, userId } = req.params
 
     const updatedMembers = await Project.deleteMember(projectId, userId)
 
     return res.status(200).json(updatedMembers).end()
+  } catch (error) {
+    console.log(error)
+    return res.sendStatus(500)
+  }
+}
+
+export const sendReminder = async (req: Request, res: Response) => {
+  try {
+    const { memberId, projectId } = req.params
+    const { senderId, message } = req.body
+
+    await Project.sendReminder(memberId, senderId, projectId, message)
+
+    res.status(200).json({ message: 'Your reminder has been sent!' }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)

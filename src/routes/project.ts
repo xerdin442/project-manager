@@ -12,4 +12,5 @@ export default (router: express.Router) => {
   router.get('/projects/:projectId/members', Project.getAllMembers)
   router.post('/projects/:projectId/new-admin/:userId', Project.addAdmin)
   router.delete('/projects/:projectId/members/delete/:userId', Project.deleteMember)
+  router.post('/projects/:projectId/members/send-reminder/:memberId', Project.sendReminder)
 };

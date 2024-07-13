@@ -52,10 +52,10 @@ export const getReminders = async (id: string) => {
   const user = await getUserById(id)
   
   const reminders = user.reminders.map(async (reminder) => {
-    // reminder logic
+    const populatedReminder = await (await reminder.populate('project', 'name deadline')).populate('sender', 'username profileImage');
+
+    return populatedReminder;
   })
 
   return reminders;
 }
-
-export const sendReminder = async () => {}

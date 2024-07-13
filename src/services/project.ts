@@ -1,5 +1,5 @@
-import user from 'src/routes/user';
 import { Project } from '../models/project';
+import { getUserById } from './user';
 
 export const getAll = () => {
   return Project.find()
@@ -39,7 +39,8 @@ export const getAllMembers = async (id: string) => {
 }
 
 export const deleteMember = async (projectId: string, userId: string) => {
-  const updatedMembers = Project.findByIdAndUpdate(projectId,
+  const updatedMembers = Project.findByIdAndUpdate(
+    projectId,
     { $pull: { members: { user: userId } } },
     { new: true }
   )
@@ -50,13 +51,30 @@ export const deleteMember = async (projectId: string, userId: string) => {
 export const addAdmin = async (projectId: string, userId: string) => {
   const project = await getprojectById(projectId)
 
-  await project.addAdmin(userId)
+  const userIndex = project.members.findIndex(member => userId === member.user.toString())
+  project.members[userIndex].role = 'admin'
+
+  await project.save()
 
   return getMembersByRole(projectId, 'admin')
 }
 
+export const addPhase = async (projectId: string) => {
+  const project = await getprojectById(projectId)
+}
+
+export const sendReminder = async (memberId: string, senderId: string, projectId: string, message: string) => {
+  const member = await getUserById(memberId)
+
+  member.reminders.push({
+    project: projectId,
+    sender: senderId,
+    message: message
+  })
+
+  return member.save()
+}
 //send invite
 //accept invite
 //add phase
 //delete phase
-//update status

@@ -1,8 +1,8 @@
-import express from 'express';
+import { Request, Response } from 'express';
 
-import * as User from '../util/user';
+import * as User from '../services/user';
 
-export const getAll = async (req: express.Request, res: express.Response) => {
+export const getAll = async (req: Request, res: Response) => {
   try {
     const users = await User.getAll()
 
@@ -13,7 +13,7 @@ export const getAll = async (req: express.Request, res: express.Response) => {
   }
 }
 
-export const updateProfile = async (req: express.Request, res: express.Response) => {
+export const updateProfile = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params
     const { username, email } = req.body
@@ -28,20 +28,20 @@ export const updateProfile = async (req: express.Request, res: express.Response)
   }
 }
 
-export const deleteUser = async (req: express.Request, res: express.Response) => {
+export const deleteUser = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params
 
-    const deletedUser = await User.deleteUser(userId)
+    await User.deleteUser(userId)
 
-    return res.status(200).json(deletedUser).end()
+    return res.status(200).json({ message: 'User deleted successfully' }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
   }
 }
 
-export const getProjectsAsMember = async (req: express.Request, res: express.Response) => {
+export const getProjectsAsMember = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params
     const { role } = req.query
@@ -59,7 +59,7 @@ export const getProjectsAsMember = async (req: express.Request, res: express.Res
   }
 }
 
-export const getProjectsAsAdmin = async (req: express.Request, res: express.Response) => {
+export const getProjectsAsAdmin = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params
     const { role } = req.query
@@ -77,7 +77,7 @@ export const getProjectsAsAdmin = async (req: express.Request, res: express.Resp
   }
 }
 
-export const getUserProjects = async (req: express.Request, res: express.Response) => {
+export const getUserProjects = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params
 
@@ -90,7 +90,7 @@ export const getUserProjects = async (req: express.Request, res: express.Respons
   }
 }
 
-export const getReminders = async (req: express.Request, res: express.Response) => {
+export const getReminders = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params
 
