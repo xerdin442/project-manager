@@ -7,9 +7,12 @@ import mongoose from 'mongoose';
 import connectMongoDBSession from 'connect-mongodb-session';
 import session from 'express-session';
 import dotenv from 'dotenv';
+import passport from 'passport';
 
 import initializeRoutes from '../src/routes/index';
+import { googleAuth } from '../src/config/authentication'
 import sessionDts from '../types/session';
+import expressUserDts from '../types/express-user'
 
 const app = express()
 
@@ -34,6 +37,10 @@ app.use(session({
   store: store,
   cookie: { maxAge: 1000 * 60 * 60 * 3, secure: false } // Set expiration time of cookie
 }))
+
+// Initializing passport strategies and sessions
+app.use(passport.initialize())
+app.use(passport.session())
 
 // Configure routes
 app.use('/api', initializeRoutes())

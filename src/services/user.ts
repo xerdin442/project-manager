@@ -58,3 +58,12 @@ export const getReminders = async (id: string) => {
 
   return user.reminders;
 }
+
+export const checkResetToken = async (resetToken: string) => {
+  const user = await User.findOne({
+    resetToken: resetToken,
+    resetTokenExpiration: { $gt: Date.now() } // Check if token expiration date is higher than current date
+  }).select('+password')
+
+  return user;
+}

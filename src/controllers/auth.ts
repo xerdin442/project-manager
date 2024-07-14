@@ -1,8 +1,11 @@
-import { Request, Response } from 'express'
+import { Request, Response, NextFunction } from 'express'
 import bcrypt from 'bcryptjs'
+import { uuid } from 'uuidv4'
+import passport from 'passport'
 
 import * as User from '../services/user'
 import { addMember } from '../services/project'
+import { sendEmail } from '../helpers/mail'
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -68,4 +71,92 @@ export const login = async (req: Request, res: Response) => {
     console.log(error)
     return res.sendStatus(500) // Send an error message if any server errors are encountered
   }
+}
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body
+
+    // Find user by email address and return an error if not found
+    const user = await User.getUserByEmail(email)
+    if (!user) {
+      return res.status(400).send('User with that email does not exist')
+    }
+  
+    // Continue if a user is registered with the email address
+    user.resetToken = uuid() // Generate reset token to be sent to user
+    user.resetTokenExpiration = Date.now() + 3600000 // Set the expiration time of the token
+    await user.save() // Save changes
+  
+    sendEmail(user) // Send reset link to the user's email address
+  
+    return res.status(200).json({ message: 'A reset link has been sent to your email' }).end()
+  } catch (error) {
+    console.log(error)
+    return res.sendStatus(500) // Send an error message if any server errors are encountered
+  }
+}
+
+export const getNewPassword = async (req: Request, res: Response) => {
+  try {
+    const { resetToken } = req.params
+
+    const user = await User.checkResetToken(resetToken)
+    if (user) {
+      return res.redirect(`/auth/change-password?resetToken=${user.resetToken}`)
+    } else {
+      return res.status(400).send('Invalid reset token')
+    }
+  } catch (error) {
+    console.log(error)
+    return res.sendStatus(500) // Send an error message if any server errors are encountered      
+  }
+}
+
+export const changePassword = async (req: Request, res: Response) => {
+  try {
+    const { resetToken } = req.params
+    const { password } = req.body
+  
+    const user = await User.checkResetToken(resetToken)
+    if (!user) {
+      return res.status(400).send('Invalid reset token') // Send error message if token is invalid
+    }
+  
+    // If reset token is valid, hash and update password and save changes
+    const hashedPassword = await bcrypt.hash(password, 12)  
+    user.password = hashedPassword
+    // Reset token value and expiration date after use
+    user.resetToken = undefined
+    user.resetTokenExpiration = undefined
+    await user.save()
+  
+    return res.redirect('/auth/login')
+  
+  } catch (error) {
+    console.log(error)
+    return res.sendStatus(500) // Send an error message if any server errors are encountered 
+  }
+}
+
+export const googleSignIn = (req: Request, res: Response, next: NextFunction) => {
+  const { userId } = req.query
+  const state = userId ? encodeURIComponent(JSON.stringify({ userId })) : ''
+
+  passport.authenticate('google', {
+    scope: ['email', 'profile'],
+    state: state || undefined // Pass the state parameter if it exists
+  })(req, res, next)
+}
+
+export const googleRedirect = (req: Request, res: Response) => {
+  let state: any
+  if (req.query.state) {
+    state = JSON.parse(decodeURIComponent(req.query.state as string))
+  }
+
+  // Use the userId from state parameters if available, or the id from req.user
+  const userId = state?.userId || req.user?.id
+
+  res.redirect(`/users/profile/${userId}`)
 }

@@ -13,6 +13,19 @@ export const getAll = async (req: Request, res: Response) => {
   }
 }
 
+export const getProfile = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params
+
+    const user = await User.getUserById(userId)
+
+    return res.status(200).json(user).end()
+  } catch (error) {
+    console.log(error)
+    return res.sendStatus(500)
+  }
+}
+
 export const updateProfile = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params
@@ -34,7 +47,7 @@ export const deleteUser = async (req: Request, res: Response) => {
 
     await User.deleteUser(userId)
 
-    return res.status(200).json({ message: 'User deleted successfully' }).end()
+    res.redirect('/auth/register')
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)

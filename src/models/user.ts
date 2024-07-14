@@ -2,14 +2,18 @@ import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface IUser extends Document {
   username: string
+  googleId?: string
   email: string
   profileImage: string
   password: string
-  reminders: { project: Types.ObjectId, sender: Types.ObjectId, message: string }[]
+  reminders: { project: Types.ObjectId, sender: Types.ObjectId, message: string }[],
+  resetToken?: string,
+  resetTokenExpiration?: Number
 }
 
 const userSchema = new Schema<IUser>({
   username: { type: String, required: true },
+  googleId: { type: String, required: true },
   email: { type: String, required: true },
   profileImage: { type: String, required: true, default: 'image' },
   password: { type: String, required: true, select: false },
@@ -18,6 +22,8 @@ const userSchema = new Schema<IUser>({
     sender: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
     message: { type: String, required: true }
   }],
+  resetToken: { type: String },
+  resetTokenExpiration: { type: Number }
 })
 
 export const User = mongoose.model<IUser>('User', userSchema);

@@ -146,7 +146,7 @@ export const sendReminder = async (req: Request, res: Response) => {
   try {
     const { memberId, projectId } = req.params
     const { message } = req.body
-    const senderId = req.session.user._id
+    const senderId = req.session.user._id || req.user.id
 
     await Project.sendReminder(memberId, senderId, projectId, message)
 
@@ -173,5 +173,5 @@ export const getInviteLink = async (req: Request, res: Response) => {
 export const acceptInvite = async (req: Request, res: Response) => {
   const { inviteToken } = req.params
 
-  return res.redirect(`/login?inviteToken=${inviteToken}`)
+  return res.redirect(`/auth/login?inviteToken=${inviteToken}`)
 }
