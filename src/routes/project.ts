@@ -7,7 +7,7 @@ export default (router: express.Router) => {
   router.get('/projects', Project.getAll);
   router.get('/projects/:projectId', isLoggedIn, isProjectMember, Project.projectDetails)
   router.post('/projects/create/:userId', isLoggedIn, Project.createProject)
-  router.put('/projects/update/:projectId', isLoggedIn, isProjectAdmin, Project.updateProject)
+  router.post('/projects/update/:projectId', isLoggedIn, isProjectAdmin, Project.updateProject)
   router.delete('/projects/delete/:projectId', isLoggedIn, isProjectAdmin, Project.deleteProject)
   
   // Membership
@@ -23,11 +23,4 @@ export default (router: express.Router) => {
   // Invites
   router.get('/projects/:projectId/get-invite-link', isLoggedIn, isProjectAdmin, Project.getInviteLink)
   router.get('/projects/:projectId/invite/:inviteToken', Project.acceptInvite)
-  
-  // Tasks
-  router.get('/projects/:projectId/tasks/', isLoggedIn, isProjectMember, Project.getProjectTasks)
-  router.get('/projects/:projectId/tasks/:memberId', isLoggedIn, isProjectMember, Project.getTasksPerMember)
-  router.post('/projects/:projectId/assign-task/:memberId', isLoggedIn, isProjectAdmin, Project.assignTask)
-  router.post('/projects/:projectId/tasks/update/:taskId', isLoggedIn, isProjectAdmin, Project.updateTask)
-  router.get('/projects/:projectId/tasks/delete/:taskId', isLoggedIn, isProjectAdmin, Project.deleteTask)
 };

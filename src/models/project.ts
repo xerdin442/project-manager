@@ -6,7 +6,6 @@ export interface IProject extends Document {
   client: string
   description: string
   deadline: Date
-  phases: string[]
   status: string
   inviteToken: string
 }
@@ -23,7 +22,6 @@ const projectSchema = new Schema<IProject>({
   client: { type: String, required: true },
   description: { type: String, required: true },
   deadline: { type: Date, required: true },
-  phases: { type: [String] },
   status: { type: String, enum: STATUS, required: true, default: 'In Progress' },
   inviteToken: { type: String, required: true, unique: true }
 });

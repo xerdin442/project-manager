@@ -15,9 +15,9 @@ export const getUserByEmail = (email: string) => {
 }
 
 export const createUser = async (values: Record<string, any>) => {
-  const userDoc = new User(values)
-
-  const user = await userDoc.save();
+  const user = new User(values)
+  await user.save();
+  
   return user.toObject();
 }
 

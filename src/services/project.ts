@@ -3,7 +3,6 @@ import { Request, Response } from 'express';
 
 import { Project } from '../models/project';
 import { getUserById } from './user';
-import { Task } from '../models/task';
 
 export const getAll = () => {
   return Project.find()
@@ -14,9 +13,9 @@ export const getprojectById = (id: string) => {
 }
 
 export const createProject = async (values: Record<string, any>) => {
-  const projectDoc = new Project(values)
-
-  const project = await projectDoc.save();
+  const project = new Project(values)
+  await project.save();
+  
   return project.toObject();
 }
 
@@ -106,15 +105,4 @@ export const addMember = async (inviteToken: string, req: Request, res: Response
   }
 }
 
-export const getProjectTasks = async (projectId: string) => {
-  return Task.find({ project: projectId })
-}
-
-export const getTasksPerMember = async (memberId: string, projectId: string) => {
-  const tasks = await getProjectTasks(projectId)
-
-  const tasksPerMember = tasks.filter(task => task.project.equals(memberId))
-
-  return tasksPerMember;
-}
 //delete phase
