@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { uuid } from 'uuidv4'
+import mongoose from 'mongoose';
 
 import * as Project from '../services/project';
-import { getUserById } from '../services/user';
 
 export const getAll = async (req: Request, res: Response) => {
   try {
@@ -18,13 +18,13 @@ export const getAll = async (req: Request, res: Response) => {
 export const createProject = async (req: Request, res: Response) => {
   try {
     const { name, client, description, deadline } = req.body
-    const user = await getUserById(req.params.userId)
+    const { userId } = req.params
     const token = uuid()
 
     const project = Project.createProject({
       name,
       members: [{
-        user: user._id,
+        user: new mongoose.Types.ObjectId(userId),
         role: "admin"
       }],
       client,
@@ -145,12 +145,12 @@ export const deleteMember = async (req: Request, res: Response) => {
 export const sendReminder = async (req: Request, res: Response) => {
   try {
     const { memberId, projectId } = req.params
-    const { senderId, message } = req.body
-    // Change senderId to session user id after auth is configured
+    const { message } = req.body
+    const senderId = req.session.user._id
 
     await Project.sendReminder(memberId, senderId, projectId, message)
 
-    res.status(200).json({ message: 'Your reminder has been sent!' }).end()
+    return res.status(200).json({ message: 'Your reminder has been sent!' }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -163,9 +163,15 @@ export const getInviteLink = async (req: Request, res: Response) => {
 
     const inviteLink = await Project.getInviteLink(projectId)
   
-    res.status(200).json(inviteLink).end()  
+    return res.status(200).json(inviteLink).end()  
   } catch (error) {
    console.log(error)
-   res.sendStatus(500) 
+   return res.sendStatus(500) 
   }
+}
+
+export const acceptInvite = async (req: Request, res: Response) => {
+  const { inviteToken } = req.params
+
+  return res.redirect(`/login?inviteToken=${inviteToken}`)
 }

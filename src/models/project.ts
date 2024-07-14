@@ -1,9 +1,20 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Document, Types } from "mongoose";
+
+export interface IProject extends Document {
+  name: string
+  members: { user: Types.ObjectId, role: string }[]
+  client: string
+  description: string
+  deadline: Date
+  phases: string[]
+  status: string
+  inviteToken: string
+}
 
 // Define the valid 'status' values
 const STATUS = ['Not Started', 'In Progress', 'Completed', 'On Hold', 'Cancelled'];
 
-const projectSchema = new Schema({
+const projectSchema = new Schema<IProject>({
   name: { type: String, required: true },
   members: [{
     user: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
@@ -17,4 +28,4 @@ const projectSchema = new Schema({
   inviteToken: { type: String, required: true, unique: true }
 });
 
-export const Project = mongoose.model('Project', projectSchema);
+export const Project = mongoose.model<IProject>('Project', projectSchema);

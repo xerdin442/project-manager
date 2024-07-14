@@ -1,3 +1,6 @@
+import mongoose from 'mongoose';
+import { Request, Response } from 'express';
+
 import { Project } from '../models/project';
 import { getUserById } from './user';
 
@@ -51,7 +54,7 @@ export const deleteMember = async (projectId: string, userId: string) => {
 export const addAdmin = async (projectId: string, userId: string) => {
   const project = await getprojectById(projectId)
 
-  const userIndex = project.members.findIndex(member => userId === member.user.toString())
+  const userIndex = project.members.findIndex(member => member.user.equals(userId))
   project.members[userIndex].role = 'admin'
 
   await project.save()
@@ -67,8 +70,8 @@ export const sendReminder = async (memberId: string, senderId: string, projectId
   const member = await getUserById(memberId)
 
   member.reminders.push({
-    project: projectId,
-    sender: senderId,
+    project: new mongoose.Types.ObjectId(projectId),
+    sender: new mongoose.Types.ObjectId(senderId),
     message: message
   })
 
@@ -77,17 +80,28 @@ export const sendReminder = async (memberId: string, senderId: string, projectId
 
 export const getInviteLink = async (projectId: string) => {
   const project = await getprojectById(projectId)
-  const inviteLink = `http://localhost:3000/api/projects/invite/${project.inviteToken}`
+  const inviteLink = `http://localhost:3000/api/projects/${project._id}/invite/${project.inviteToken}`
 
   return inviteLink;
 }
 
-export const acceptInvite = async (token: string, userId: string) => {
-  const project = await Project.findOne({ inviteToken: token })
+export const addMember = async (inviteToken: string, req: Request, res: Response) => {
+  const project = await Project.findOne({ inviteToken })
+  if (project) {
+    const userId = req.session.user._id
 
-  project.members.push({
-    user: userId,
-    role: 'member'
-  })
+    // Check if the user is already a member
+    const isMember = project.members.some(member => member.user.equals(userId));
+    if (!isMember) {
+      project.members.push({ user: userId, role: 'member' });
+      await project.save();
+
+      return res.status(200).json({ message: `You have joined ${project.name} as member!` }).end()
+    } else {
+      return res.status(400).send('You are already a member of this project')
+    }
+  } else {
+    return res.status(400).send('Project not found')
+  }
 }
 //delete phase

@@ -32,7 +32,7 @@ export const getProjectsByRole = async (id: string, role: string) => {
   const projects = await Project.find()
 
   const projectsByRole = projects.filter(project => {
-    return project.members.filter(member => id === member.user.toString() && role === member.role);
+    return project.members.filter(member => member.user.equals(id) && role === member.role);
   })
 
   return projectsByRole;
@@ -42,7 +42,7 @@ export const getUserProjects = async (id: string) => {
   const projects = await Project.find()
 
   const userProjects = projects.filter(project => {
-    return project.members.filter(member => id === member.user.toString());
+    return project.members.filter(member => member.user.equals(id));
   })
 
   return userProjects;
@@ -50,12 +50,11 @@ export const getUserProjects = async (id: string) => {
 
 export const getReminders = async (id: string) => {
   const user = await getUserById(id)
-  
-  const reminders = user.reminders.map(async (reminder) => {
-    const populatedReminder = await (await reminder.populate('project', 'name deadline')).populate('sender', 'username profileImage');
 
-    return populatedReminder;
-  })
+  await user.populate([
+    { path: 'reminders.project', select: 'name deadline' },
+    { path: 'reminders.sender', select: 'username profileImage' }
+  ])
 
-  return reminders;
+  return user.reminders;
 }
