@@ -1,5 +1,6 @@
 import { User } from '../models/user';
 import { Project } from '../models/project';
+import { Task } from '../models/task';
 
 export const getAll = () => {
   return User.find()
@@ -66,4 +67,16 @@ export const checkResetToken = async (resetToken: string) => {
   }).select('+password')
 
   return user;
+}
+
+export const getUserTasks = async (id: string) => {
+  return Task.find({ user: id })
+}
+
+export const getTasksPerProject = async (userId: string, projectId: string) => {
+  const tasks = await getUserTasks(userId)
+
+  const tasksPerProject = tasks.filter(task => task.project.equals(projectId))
+
+  return tasksPerProject;
 }

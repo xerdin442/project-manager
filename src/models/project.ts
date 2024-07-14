@@ -12,7 +12,7 @@ export interface IProject extends Document {
 }
 
 // Define the valid 'status' values
-const STATUS = ['Not Started', 'In Progress', 'Completed', 'On Hold', 'Cancelled'];
+const STATUS = ['In Progress', 'Completed', 'Archived', 'Cancelled'];
 
 const projectSchema = new Schema<IProject>({
   name: { type: String, required: true },
@@ -24,7 +24,7 @@ const projectSchema = new Schema<IProject>({
   description: { type: String, required: true },
   deadline: { type: Date, required: true },
   phases: { type: [String] },
-  status: { type: String, enum: STATUS, required: true, default: 'Not Started' },
+  status: { type: String, enum: STATUS, required: true, default: 'In Progress' },
   inviteToken: { type: String, required: true, unique: true }
 });
 

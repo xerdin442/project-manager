@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 
 import { Project } from '../models/project';
 import { getUserById } from './user';
+import { Task } from '../models/task';
 
 export const getAll = () => {
   return Project.find()
@@ -103,5 +104,17 @@ export const addMember = async (inviteToken: string, req: Request, res: Response
   } else {
     return res.status(400).send('Project not found')
   }
+}
+
+export const getProjectTasks = async (projectId: string) => {
+  return Task.find({ project: projectId })
+}
+
+export const getTasksPerMember = async (memberId: string, projectId: string) => {
+  const tasks = await getProjectTasks(projectId)
+
+  const tasksPerMember = tasks.filter(task => task.project.equals(memberId))
+
+  return tasksPerMember;
 }
 //delete phase

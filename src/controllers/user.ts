@@ -115,3 +115,30 @@ export const getReminders = async (req: Request, res: Response) => {
     return res.sendStatus(500)
   }
 }
+
+export const getUserTasks = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params
+
+    const tasks = await User.getUserTasks(userId)
+
+    res.status(200).json(tasks).end()
+  } catch (error) {
+    console.log(error)
+    return res.sendStatus(500)
+  } 
+}
+
+export const getTasksPerProject = async (req: Request, res: Response) => {
+  try {
+    const { projectId } = req.params
+    const userId = req.session.user._id || req.user.id
+
+    const tasksPerProject = await User.getTasksPerProject(userId, projectId)
+
+    res.status(200).json(tasksPerProject).end()
+  } catch (error) {
+    console.log(error)
+    return res.sendStatus(500)
+  } 
+}

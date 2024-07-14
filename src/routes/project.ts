@@ -9,12 +9,25 @@ export default (router: express.Router) => {
   router.post('/projects/create/:userId', isLoggedIn, Project.createProject)
   router.put('/projects/update/:projectId', isLoggedIn, isProjectAdmin, Project.updateProject)
   router.delete('/projects/delete/:projectId', isLoggedIn, isProjectAdmin, Project.deleteProject)
+  
+  // Membership
   router.get('/projects/:projectId?role=member', isLoggedIn, isProjectMember, Project.getMembers)
   router.get('/projects/:projectId?role=admin', isLoggedIn, isProjectMember, Project.getAdmins)
   router.get('/projects/:projectId/members', isLoggedIn, isProjectMember, Project.getAllMembers)
   router.post('/projects/:projectId/new-admin/:userId', isLoggedIn, isProjectAdmin, Project.addAdmin)
   router.delete('/projects/:projectId/members/delete/:userId', isLoggedIn, isProjectAdmin, Project.deleteMember)
+  
+  // Reminders
   router.post('/projects/:projectId/members/send-reminder/:memberId', isLoggedIn, isProjectAdmin, Project.sendReminder)
+  
+  // Invites
   router.get('/projects/:projectId/get-invite-link', isLoggedIn, isProjectAdmin, Project.getInviteLink)
   router.get('/projects/:projectId/invite/:inviteToken', Project.acceptInvite)
+  
+  // Tasks
+  router.get('/projects/:projectId/tasks/', isLoggedIn, isProjectMember, Project.getProjectTasks)
+  router.get('/projects/:projectId/tasks/:memberId', isLoggedIn, isProjectMember, Project.getTasksPerMember)
+  router.post('/projects/:projectId/assign-task/:memberId', isLoggedIn, isProjectAdmin, Project.assignTask)
+  router.post('/projects/:projectId/tasks/update/:taskId', isLoggedIn, isProjectAdmin, Project.updateTask)
+  router.get('/projects/:projectId/tasks/delete/:taskId', isLoggedIn, isProjectAdmin, Project.deleteTask)
 };
