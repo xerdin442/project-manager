@@ -15,6 +15,19 @@ export const getAll = async (req: Request, res: Response) => {
   }
 }
 
+export const projectDetails = async (req: Request, res: Response) => {
+  try {
+    const { projectId } = req.params
+
+    const project = await Project.getprojectById(projectId)
+
+    return res.status(200).json(project).end()
+  } catch (error) {
+    console.log(error)
+    return res.sendStatus(500)
+  }
+}
+
 export const createProject = async (req: Request, res: Response) => {
   try {
     const { name, client, description, deadline } = req.body
@@ -46,7 +59,7 @@ export const updateProject = async (req: Request, res: Response) => {
     const { name, client, description, deadline, status } = req.body
 
     const project = await Project.updateProject(projectId, { name, client, description, deadline, status })
-
+    
     return res.status(200).json(project).end()
   } catch (error) {
     console.log(error)

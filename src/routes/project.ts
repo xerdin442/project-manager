@@ -5,6 +5,7 @@ import { isLoggedIn, isProjectAdmin, isProjectMember } from '../middlewares/auth
 
 export default (router: express.Router) => {
   router.get('/projects', Project.getAll);
+  router.get('/projects/:projectId', isLoggedIn, isProjectMember, Project.projectDetails)
   router.post('/projects/create/:userId', isLoggedIn, Project.createProject)
   router.put('/projects/update/:projectId', isLoggedIn, isProjectAdmin, Project.updateProject)
   router.delete('/projects/delete/:projectId', isLoggedIn, isProjectAdmin, Project.deleteProject)
