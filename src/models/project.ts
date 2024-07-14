@@ -14,7 +14,7 @@ const projectSchema = new Schema({
   deadline: { type: Date, required: true },
   phases: { type: [String] },
   status: { type: String, enum: STATUS, required: true, default: 'Not Started' },
-  inviteToken: { type: String }
+  inviteToken: { type: String, required: true, unique: true }
 });
 
 export const Project = mongoose.model('Project', projectSchema);

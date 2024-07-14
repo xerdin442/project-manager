@@ -74,7 +74,20 @@ export const sendReminder = async (memberId: string, senderId: string, projectId
 
   return member.save()
 }
-//send invite
-//accept invite
-//add phase
+
+export const getInviteLink = async (projectId: string) => {
+  const project = await getprojectById(projectId)
+  const inviteLink = `http://localhost:3000/api/projects/invite/${project.inviteToken}`
+
+  return inviteLink;
+}
+
+export const acceptInvite = async (token: string, userId: string) => {
+  const project = await Project.findOne({ inviteToken: token })
+
+  project.members.push({
+    user: userId,
+    role: 'member'
+  })
+}
 //delete phase

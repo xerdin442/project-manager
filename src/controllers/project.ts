@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { uuid } from 'uuidv4'
 
 import * as Project from '../services/project';
 import { getUserById } from '../services/user';
@@ -18,6 +19,7 @@ export const createProject = async (req: Request, res: Response) => {
   try {
     const { name, client, description, deadline } = req.body
     const user = await getUserById(req.params.userId)
+    const token = uuid()
 
     const project = Project.createProject({
       name,
@@ -27,7 +29,8 @@ export const createProject = async (req: Request, res: Response) => {
       }],
       client,
       description,
-      deadline
+      deadline,
+      inviteToken: token
     })
 
     return res.status(200).json(project).end()
@@ -143,6 +146,7 @@ export const sendReminder = async (req: Request, res: Response) => {
   try {
     const { memberId, projectId } = req.params
     const { senderId, message } = req.body
+    // Change senderId to session user id after auth is configured
 
     await Project.sendReminder(memberId, senderId, projectId, message)
 
@@ -150,5 +154,18 @@ export const sendReminder = async (req: Request, res: Response) => {
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
+  }
+}
+
+export const getInviteLink = async (req: Request, res: Response) => {
+  try {
+    const { projectId } = req.params
+
+    const inviteLink = await Project.getInviteLink(projectId)
+  
+    res.status(200).json(inviteLink).end()  
+  } catch (error) {
+   console.log(error)
+   res.sendStatus(500) 
   }
 }

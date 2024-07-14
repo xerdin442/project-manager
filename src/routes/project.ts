@@ -13,4 +13,5 @@ export default (router: express.Router) => {
   router.post('/projects/:projectId/new-admin/:userId', Project.addAdmin)
   router.delete('/projects/:projectId/members/delete/:userId', Project.deleteMember)
   router.post('/projects/:projectId/members/send-reminder/:memberId', Project.sendReminder)
+  router.get('/projects/:projectId/get-invite-link', Project.getInviteLink)
 };
