@@ -43,7 +43,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // Check the email and send an error message if it does not exist
-    const user = await User.getUserByEmail(email)
+    const user = await User.getUserByEmail(email).select('+password')
     if (!user) {
       return res.status(400).send('No user found with that email')
     }
