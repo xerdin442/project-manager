@@ -47,7 +47,7 @@ export const deleteUser = async (req: Request, res: Response) => {
 
     await User.deleteUser(userId)
 
-    res.redirect('/auth/register')
+    return res.status(200).json({ message: 'User successfully deleted' })
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)

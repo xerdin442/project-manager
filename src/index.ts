@@ -42,6 +42,8 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
+googleAuth()
+
 // Configure routes
 app.use('/api', initializeRoutes())
 

@@ -14,13 +14,13 @@ export default (router: express.Router) => {
   router.get('/projects/:projectId?role=member', isLoggedIn, isProjectMember, Project.getMembers)
   router.get('/projects/:projectId?role=admin', isLoggedIn, isProjectMember, Project.getAdmins)
   router.get('/projects/:projectId/members', isLoggedIn, isProjectMember, Project.getAllMembers)
-  router.post('/projects/:projectId/new-admin/:userId', isLoggedIn, isProjectAdmin, Project.addAdmin)
-  router.delete('/projects/:projectId/members/delete/:userId', isLoggedIn, isProjectAdmin, Project.deleteMember)
+  router.post('/projects/:projectId/new-admin/:memberId', isLoggedIn, isProjectAdmin, Project.addAdmin)
+  router.delete('/projects/:projectId/members/delete/:memberId', isLoggedIn, isProjectAdmin, Project.deleteMember)
   
   // Reminders
   router.post('/projects/:projectId/members/send-reminder/:memberId', isLoggedIn, isProjectAdmin, Project.sendReminder)
   
   // Invites
-  router.get('/projects/:projectId/get-invite-link', isLoggedIn, isProjectAdmin, Project.getInviteLink)
+  router.get('/projects/:projectId/get-invite', isLoggedIn, isProjectAdmin, Project.getInviteLink)
   router.get('/projects/:projectId/invite/:inviteToken', Project.acceptInvite)
 };

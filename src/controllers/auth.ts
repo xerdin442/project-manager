@@ -73,6 +73,30 @@ export const login = async (req: Request, res: Response) => {
   }
 }
 
+export const logout = (req: Request, res: Response) => {
+  if (req.user) {
+    req.logout(err => {
+      if (err) {
+        console.log(err)
+        return res.sendStatus(500)
+      }
+
+      return res.status(200).json({ message: 'You logged out' })
+    })
+  }
+
+  if (req.session.user) {
+    req.session.destroy((err) => {
+      if (err) {
+        console.log(err)
+        return res.sendStatus(500)
+      }
+
+      return res.status(200).json({ message: 'You logged out' })
+    })
+  }
+}
+
 export const resetPassword = async (req: Request, res: Response) => {
   try {
     const { email } = req.body
@@ -103,7 +127,7 @@ export const getNewPassword = async (req: Request, res: Response) => {
 
     const user = await User.checkResetToken(resetToken)
     if (user) {
-      return res.redirect(`/auth/change-password?resetToken=${user.resetToken}`)
+      return res.redirect(`/api/auth/change-password?resetToken=${user.resetToken}`)
     } else {
       return res.status(400).send('Invalid reset token')
     }
@@ -115,10 +139,10 @@ export const getNewPassword = async (req: Request, res: Response) => {
 
 export const changePassword = async (req: Request, res: Response) => {
   try {
-    const { resetToken } = req.params
+    const { resetToken } = req.query
     const { password } = req.body
   
-    const user = await User.checkResetToken(resetToken)
+    const user = await User.checkResetToken(resetToken as string)
     if (!user) {
       return res.status(400).send('Invalid reset token') // Send error message if token is invalid
     }
@@ -131,8 +155,7 @@ export const changePassword = async (req: Request, res: Response) => {
     user.resetTokenExpiration = undefined
     await user.save()
   
-    return res.redirect('/auth/login')
-  
+    return res.status(200).send({ message: 'Password has been reset' })
   } catch (error) {
     console.log(error)
     return res.sendStatus(500) // Send an error message if any server errors are encountered 

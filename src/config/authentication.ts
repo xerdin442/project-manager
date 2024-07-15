@@ -4,12 +4,12 @@ import { Strategy as GoogleStrategy, VerifyCallback } from 'passport-google-oaut
 import { User } from "../models/user";
 import { createUser } from "../services/user";
 
-const initialize = () => {
+export const googleAuth = () => {
   passport.use(new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: '/auth/google/redirect',
+      callbackURL: '/api/auth/google/redirect',
       passReqToCallback: true
     },
     async (accessToken: string, refreshToken: string, profile: any, done: VerifyCallback) => {
@@ -47,5 +47,3 @@ const initialize = () => {
     }
   })
 }
-
-export const googleAuth = initialize()

@@ -131,9 +131,9 @@ export const getAdmins = async (req: Request, res: Response) => {
 
 export const addAdmin = async (req: Request, res: Response) => {
   try {
-    const { projectId, userId } = req.params
+    const { projectId, memberId } = req.params
 
-    const updatedAdmins = await Project.addAdmin(projectId, userId)
+    const updatedAdmins = await Project.addAdmin(projectId, memberId)
 
     return res.status(200).json(updatedAdmins).end()
   } catch (error) {
@@ -144,9 +144,9 @@ export const addAdmin = async (req: Request, res: Response) => {
 
 export const deleteMember = async (req: Request, res: Response) => {
   try {
-    const { projectId, userId } = req.params
+    const { projectId, memberId } = req.params
 
-    const updatedMembers = await Project.deleteMember(projectId, userId)
+    const updatedMembers = await Project.deleteMember(projectId, memberId)
 
     return res.status(200).json(updatedMembers).end()
   } catch (error) {
@@ -186,5 +186,5 @@ export const getInviteLink = async (req: Request, res: Response) => {
 export const acceptInvite = async (req: Request, res: Response) => {
   const { inviteToken } = req.params
 
-  return res.redirect(`/auth/login?inviteToken=${inviteToken}`)
+  return res.redirect(`/api/auth/login?inviteToken=${inviteToken}`)
 }
