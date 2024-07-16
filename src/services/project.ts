@@ -41,26 +41,24 @@ export const deleteProject = (id: string) => {
 
 export const getMembersByRole = async (id: string, role: string) => {
   const project = await getprojectById(id)
+  const populatedProject = await populateProject(project)
+  const membersByRole = populatedProject.members.filter(member => role === member.role);
 
-  const membersByRole = project.members.filter(member => role === member.role);
-
-  return membersByRole
+  return membersByRole;
 }
 
 export const getAllMembers = async (id: string) => {
   const project = await getprojectById(id)
+  const populatedProject = await populateProject(project)
 
-  return project.members
+  return populatedProject.members;
 }
 
 export const deleteMember = async (projectId: string, userId: string) => {
-  const updatedMembers = Project.findByIdAndUpdate(
-    projectId,
-    { $pull: { members: { user: userId } } },
-    { new: true }
-  )
+  const project = await updateProject(projectId, { $pull: { members: { user: userId } } })
+  const updatedProject = await populateProject(project)
 
-  return updatedMembers
+  return updatedProject.members;
 }
 
 export const addAdmin = async (projectId: string, userId: string) => {
@@ -70,7 +68,7 @@ export const addAdmin = async (projectId: string, userId: string) => {
   project.members[userIndex].role = 'admin'
   await project.save()
 
-  return getMembersByRole(projectId, 'admin')
+  return await getMembersByRole(projectId, 'admin');
 }
 
 export const sendReminder = async (memberId: string, senderId: string, projectId: string, message: string) => {
