@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express'
 import { getAllMembers, getMembersByRole } from '../services/project'
 
 export const isLoggedIn = (req: Request, res: Response, next: NextFunction) => {
-  if (!(req.session.isLoggedIn || req.user)) {
+  if (!(req.session.user || req.user)) {
     return res.redirect('/auth/login')
   }
 

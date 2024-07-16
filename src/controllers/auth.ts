@@ -57,9 +57,7 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).send('Invalid password')
     }
 
-    // Configure session data for newly logged in user
-    req.session.isLoggedIn = true
-    req.session.user = user
+    req.session.user = user // Configure session data for newly logged in user
 
     /* When a user is redirected to login after clicking an invite,
     check for query parameters and add user as project member */
@@ -107,8 +105,8 @@ export const resetPassword = async (req: Request, res: Response) => {
       return res.status(400).send('User with that email does not exist')
     }
   
-    // Continue if a user is registered with the email address
-    user.resetToken = uuid() // Generate reset token to be sent to user
+    // Continue if a user is found with the email address
+    user.resetToken = uuid() // Generate a reset token to be sent to user
     user.resetTokenExpiration = Date.now() + 3600000 // Set the expiration time of the token
     await user.save() // Save changes
   

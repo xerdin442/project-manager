@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { uuid } from 'uuidv4'
-import mongoose from 'mongoose';
 
 import * as Project from '../services/project';
 
@@ -31,13 +30,13 @@ export const projectDetails = async (req: Request, res: Response) => {
 export const createProject = async (req: Request, res: Response) => {
   try {
     const { name, client, description, deadline } = req.body
-    const { userId } = req.params
     const token = uuid()
+    const userId = req.user._id || req.session.user._id
 
     const project = Project.createProject({
       name,
       members: [{
-        user: new mongoose.Types.ObjectId(userId),
+        user: userId,
         role: "admin"
       }],
       client,
@@ -56,9 +55,23 @@ export const createProject = async (req: Request, res: Response) => {
 export const updateProject = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
-    const { name, client, description, deadline, status } = req.body
+    const { name, client, description, deadline } = req.body
 
-    const project = await Project.updateProject(projectId, { name, client, description, deadline, status })
+    const project = await Project.updateProject(projectId, { name, client, description, deadline })
+    
+    return res.status(200).json(project).end()
+  } catch (error) {
+    console.log(error)
+    return res.sendStatus(500)
+  }
+}
+
+export const updateStatus = async (req: Request, res: Response) => {
+  try {
+    const { projectId } = req.params
+    const { status } = req.body
+
+    const project = await Project.updateProject(projectId, { status })
     
     return res.status(200).json(project).end()
   } catch (error) {
@@ -159,7 +172,7 @@ export const sendReminder = async (req: Request, res: Response) => {
   try {
     const { memberId, projectId } = req.params
     const { message } = req.body
-    const senderId = req.session.user._id || req.user.id
+    const senderId = req.session.user.id || req.user.id
 
     await Project.sendReminder(memberId, senderId, projectId, message)
 
@@ -187,4 +200,17 @@ export const acceptInvite = async (req: Request, res: Response) => {
   const { inviteToken } = req.params
 
   return res.redirect(`/api/auth/login?inviteToken=${inviteToken}`)
+}
+
+export const getProgress = async (req: Request, res: Response) => {
+  try {
+    const { projectId } = req.params
+
+    const progress = await Project.getProgress(projectId)
+
+    return res.status(200).json(progress).end()
+  } catch (error) {
+    console.log(error)
+    return res.sendStatus(500)
+  }
 }

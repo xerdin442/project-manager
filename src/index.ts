@@ -16,7 +16,7 @@ import expressUserDts from '../types/express-user'
 
 const app = express()
 
-dotenv.config();
+dotenv.config(); // Load environment variables
 
 // Initialize and configure middlewares
 app.use(cors({ credentials: true, origin: 'http://localhost:3000' }))
@@ -24,7 +24,7 @@ app.use(compression())
 app.use(bodyParser.json())
 app.use(cookieParser())
 
-// Initializing session middlleware
+// Configure session middlleware
 const MongoDBStore = connectMongoDBSession(session);
 const store = new MongoDBStore({
   uri: process.env.MONGO_URI,
@@ -38,14 +38,13 @@ app.use(session({
   cookie: { maxAge: 1000 * 60 * 60 * 3, secure: false } // Set expiration time of cookie
 }))
 
-// Initializing passport strategies and sessions
+// Initialize passport and authenticate sessions
 app.use(passport.initialize())
 app.use(passport.session())
 
-googleAuth()
+googleAuth() // Initialize google authentication strategy
 
-// Configure routes
-app.use('/api', initializeRoutes())
+app.use('/api', initializeRoutes()) // Configure routes
 
 // Connect to database and start the server
 mongoose.connect(process.env.MONGO_URI)

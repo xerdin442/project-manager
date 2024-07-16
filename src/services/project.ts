@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import { Request, Response } from 'express';
 
-import { Project } from '../models/project';
+import { Project, IProject } from '../models/project';
 import { getUserById } from './user';
+import { getProjectTasks } from './task';
 
 export const getAll = () => {
   return Project.find()
@@ -12,15 +13,26 @@ export const getprojectById = (id: string) => {
   return Project.findById(id)
 }
 
+export const populateProject = async (project: IProject) => {
+  const populatedProject = await Project.findById(project._id)
+  .populate({ path: 'members.user', select: 'username profileImage' }).exec()
+  
+  return populatedProject;
+}
+
 export const createProject = async (values: Record<string, any>) => {
   const project = new Project(values)
   await project.save();
+
+  const populatedProject = await populateProject(project)
   
-  return project.toObject();
+  return populatedProject.toObject();
 }
 
-export const updateProject = (id: string, values: Record<string, any>) => {
-  return Project.findByIdAndUpdate(id, values, { new: true })
+export const updateProject = async (id: string, values: Record<string, any>) => {
+  const project = await Project.findByIdAndUpdate(id, values, { new: true })
+
+  return await populateProject(project)
 }
 
 export const deleteProject = (id: string) => {
@@ -56,14 +68,9 @@ export const addAdmin = async (projectId: string, userId: string) => {
 
   const userIndex = project.members.findIndex(member => member.user.equals(userId))
   project.members[userIndex].role = 'admin'
-
   await project.save()
 
   return getMembersByRole(projectId, 'admin')
-}
-
-export const addPhase = async (projectId: string) => {
-  const project = await getprojectById(projectId)
 }
 
 export const sendReminder = async (memberId: string, senderId: string, projectId: string, message: string) => {
@@ -105,4 +112,11 @@ export const addMember = async (inviteToken: string, req: Request, res: Response
   }
 }
 
-//delete phase
+export const getProgress = async (projectId: string) => {
+  const tasks = await getProjectTasks(projectId)
+
+  const completedTasks = tasks.filter(task => task.status === 'Completed')
+  const progress = (completedTasks.length / tasks.length) * 100
+
+  return Math.ceil(progress);
+}

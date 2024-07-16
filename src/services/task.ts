@@ -1,22 +1,28 @@
-import { Task } from '../models/task';
+import { ITask, Task } from '../models/task';
 
-export const getAll = () => {
-  return Task.find()
-}
+export const populateTask = async (task: ITask) => {
+  const populatedTask = await Task.findById(task._id).populate([
+    'project',
+    { path: 'assignedBy', select: 'username profileImage' },
+    { path: 'member', select: 'username profileImage' }
+  ]).exec()
 
-export const getTaskById = (id: string) => {
-  return Task.findById(id)
+  return populatedTask;
 }
 
 export const createTask = async (values: Record<string, any>) => {
   const task = new Task(values)
   await task.save();
   
-  return task.toObject();
+  const populatedTask = await populateTask(task)
+  
+  return populatedTask.toObject();
 }
 
-export const updateTask = (id: string, values: Record<string, any>) => {
-  return Task.findByIdAndUpdate(id, values, { new: true })
+export const updateTask = async (id: string, values: Record<string, any>) => {
+  const task = await Task.findByIdAndUpdate(id, values, { new: true })
+
+  return await populateTask(task);
 }
 
 export const deleteTask = (id: string) => {
@@ -24,13 +30,17 @@ export const deleteTask = (id: string) => {
 }
 
 export const getProjectTasks = async (projectId: string) => {
-  return Task.find({ project: projectId })
+  const tasks = await Task.find({ project: projectId })
+
+  const projectTasks = tasks.map(async task => await populateTask(task))
+
+  return await Promise.all(projectTasks);
 }
 
 export const getTasksPerMember = async (memberId: string, projectId: string) => {
   const tasks = await getProjectTasks(projectId)
 
-  const tasksPerMember = tasks.filter(task => task.project.equals(memberId))
+  const tasksPerMember = tasks.filter(task => task.member.equals(memberId)).map(async task => await populateTask(task))
 
-  return tasksPerMember;
+  return await Promise.all(tasksPerMember)
 }
