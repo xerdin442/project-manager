@@ -5,15 +5,17 @@ import * as User from '../services/user'
 import { addMember } from '../services/project'
 import { sendEmail } from '../util/mail'
 import { getGoogleAuthUrl, handleGoogleCallback } from '../config/authentication'
+import { validateRequest } from '../util/error'
 
 export const register = async (req: Request, res: Response) => {
   try {
-    let { username, email, password, profileImage } = req.body // Extract required fields from request body
+    // Extract required fields from request body
+    let { username, email, password, profileImage } = req.body
 
-    if (!email || !password || !username) {
-      return res.status(400).send('All fields are required') // Send an error message if any of the required fields are missing
-    }
+    validateRequest(req, res) // Return any validation error messages
 
+    /* Use a default image if user does not upload file
+    Or set profileImage to path of stored image if user uploads file */
     if (!req.file) {
       profileImage = process.env.DEFAULT_IMAGE
     } else {
@@ -21,11 +23,6 @@ export const register = async (req: Request, res: Response) => {
     }
 
     // Resizing of images***
-
-    const existingUser = await User.getUserByEmail(email)
-    if (existingUser) {
-      return res.status(400).send('User with that email already exits') // Send an error message if user with that email already exists
-    }
 
     // If all the checks are successful, create a new user
     const hashedPassword = await bcrypt.hash(password, 12)
@@ -36,34 +33,24 @@ export const register = async (req: Request, res: Response) => {
       profileImage
     })
 
-    return res.status(200).json(user).end() // Send success message and user information
+    // Send success message if registration is complete
+    return res.status(200).json({ message: 'Registration successful, you can now login.', user: user }).end()
   } catch (error) {
+    // Log and send an error message if any server errors are encountered
     console.log(error)
-    return res.sendStatus(500) // Send an error message if any server errors are encountered
+    return res.sendStatus(500)
   }
 }
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body // Extract required fields from request body
+    const { email } = req.body // Extract required fields from request body
 
-    if (!email || !password) {
-      return res.status(400).send('All fields are required') // Send an error message if any of the required fields are missing
-    }
+    validateRequest(req, res) // Return any validation error messages
 
-    // Check the email and send an error message if it does not exist
-    const user = await User.getUserByEmail(email).select('+password')
-    if (!user) {
-      return res.status(400).send('No user found with that email')
-    }
-
-    // Check the entered password and send an error message if it is incorrect
-    const checkPassword = await bcrypt.compare(password, user.password)
-    if (!checkPassword) {
-      return res.status(400).send('Invalid password')
-    }
-
-    req.session.user = user // Configure session data for newly logged in user
+    // If all checks are successful, configure session data for newly logged in user
+    const user = await User.getUserByEmail(email)
+    req.session.user = user
 
     /* When a user is redirected to the login page after clicking an invite,
     check for query parameters and add user as project member */
@@ -72,14 +59,17 @@ export const login = async (req: Request, res: Response) => {
 
     return res.status(200).json({ message: 'Login successful' }).end() // Send a success message if login is complete
   } catch (error) {
+    // Log and send an error message if any server errors are encountered
     console.log(error)
-    return res.sendStatus(500) // Send an error message if any server errors are encountered
+    return res.sendStatus(500)
   }
 }
 
 export const logout = (req: Request, res: Response) => {
+  // Delete and reset session data before logout
   req.session.destroy((err) => {
     if (err) {
+      // Log and send an error message if any server errors are encountered
       console.log(err)
       return res.sendStatus(500)
     }
@@ -90,7 +80,7 @@ export const logout = (req: Request, res: Response) => {
 
 export const resetPassword = async (req: Request, res: Response) => {
   try {
-    const { email } = req.body
+    const { email } = req.body // Extract email from request body
     const token = Math.ceil(Math.random() * 10 ** 6) // Generate reset token that will be sent to the user
 
     // Find user by email address and return an error if not found
@@ -108,25 +98,27 @@ export const resetPassword = async (req: Request, res: Response) => {
     req.session.email = user.email // Save user's email address in a session incase the user requests for the token to be re-sent
   
     console.log(token)
+    // Notify user that password reset token has been sent
     return res.status(200).json({ message: 'A reset token has been sent to your email' }).end()
   } catch (error) {
+    // Log and send an error message if any server errors are encountered
     console.log(error)
-    return res.sendStatus(500) // Send an error message if any server errors are encountered
+    return res.sendStatus(500)
   }
 }
 
 export const checkResetToken = async (req: Request, res: Response) => {
   try {
-    const { resetToken } = req.body
+    const { resetToken } = req.body // Extract reset token from request body
 
-    const user = await User.checkResetToken(resetToken)
     // Check if reset token is valid
+    const user = await User.checkResetToken(resetToken)
     if (!user) {
       return res.status(400).send('Invalid reset token')
     }
 
-    const currentTime = new Number(Date.now())
     // Check if reset token has expired
+    const currentTime = new Number(Date.now())
     if (user.resetTokenExpiration < currentTime) {
       return res.status(400).json({ message: 'The reset token has expired' })
     }
@@ -140,12 +132,14 @@ export const checkResetToken = async (req: Request, res: Response) => {
       if (err) { console.log(err) }
     })
 
+    // Return redirect URL containing user's reset token
     const redirectURL = `http://localhost:3000/api/auth/change-password?resetToken=${user.resetToken}`
     
     return res.status(200).json({ redirectURL })
   } catch (error) {
+    // Log and send an error message if any server errors are encountered
     console.log(error)
-    return res.sendStatus(500) // Send an error message if any server errors are encountered      
+    return res.sendStatus(500)
   }
 }
 
@@ -166,17 +160,22 @@ export const resendToken = async (req: Request, res: Response) => {
     await sendEmail(user) // Send email with new reset token to user
 
     console.log(token)
+    // Notify user that password reset token has been re-sent
     return res.status(200).json({ message: 'Another token has been sent to your email' })
   } catch (error) {
+    // Log and send an error message if any server errors are encountered
     console.log(error)
-    return res.sendStatus(500) // Send an error message if any server errors are encountered
+    return res.sendStatus(500)
   }
 }
 
 export const changePassword = async (req: Request, res: Response) => {
   try {
+    // Extract reset token from query paramters and new password from request body
     const { resetToken } = req.query
     const { password } = req.body
+
+    validateRequest(req, res) // Return any validation error messages
   
     const user = await User.checkResetToken(resetToken as string)
     if (!user) {
@@ -189,10 +188,12 @@ export const changePassword = async (req: Request, res: Response) => {
     user.resetToken = undefined
     await user.save()
   
+    // Notify user if password reset is successful
     return res.status(200).send({ message: 'Password has been reset' })
   } catch (error) {
+    // Log and send an error message if any server errors are encountered
     console.log(error)
-    return res.sendStatus(500) // Send an error message if any server errors are encountered 
+    return res.sendStatus(500)
   }
 }
 

@@ -11,14 +11,13 @@ import path from 'path'
 
 import initializeRoutes from '../src/routes/index';
 import sessionDts from '../types/session';
-import { upload } from './config/storage';
 
 const app = express()
 
 dotenv.config(); // Load environment variables
 
 // Initialize and configure middlewares
-app.use(cors({ credentials: true, origin: 'http://localhost:3000' }))
+app.use(cors({ credentials: true, origin: 'http://127.0.0.1:5501' }))
 app.use(compression())
 app.use(bodyParser.json())
 app.use(cookieParser())
