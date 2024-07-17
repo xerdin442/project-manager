@@ -2,9 +2,10 @@ import express from 'express';
 
 import * as Auth from '../controllers/auth';
 import { isLoggedIn } from '../middlewares/authorization';
+import { upload } from '../config/storage';
 
 export default (router: express.Router) => {
-  router.post('/auth/register', Auth.register);
+  router.post('/auth/register', upload('images').single('profileImage'), Auth.register);
   router.post('/auth/login', Auth.login);
   router.post('/auth/logout', isLoggedIn, Auth.logout);
   router.post('/auth/reset', Auth.resetPassword)

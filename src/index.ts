@@ -43,7 +43,6 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'google.html')); // Adjust the path as needed
 });
 
-app.use(upload('images').single('profileImage')) // Initialize multer to handle file uploads
 app.use('/api', initializeRoutes()) // Configure routes
 
 // Connect to database and start the server

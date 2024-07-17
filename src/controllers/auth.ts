@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 
 import * as User from '../services/user'
 import { addMember } from '../services/project'
-import { sendEmail } from '../helpers/mail'
+import { sendEmail } from '../util/mail'
 import { getGoogleAuthUrl, handleGoogleCallback } from '../config/authentication'
 
 export const register = async (req: Request, res: Response) => {
@@ -104,7 +104,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     user.resetTokenExpiration = Date.now() + 90000
     await user.save()
   
-    sendEmail(user) // Send reset token to the user's email address
+    await sendEmail(user) // Send reset token to the user's email address
     req.session.email = user.email // Save user's email address in a session incase the user requests for the token to be re-sent
   
     return res.status(200).json({ message: 'A reset token has been sent to your email' }).end()
@@ -163,7 +163,7 @@ export const resendToken = async (req: Request, res: Response) => {
     user.resetToken = token
     await user.save()
 
-    sendEmail(user) // Send email with new reset token to user
+    await sendEmail(user) // Send email with new reset token to user
 
     return res.status(200).json({ message: 'Another token has been sent to your email' })
   } catch (error) {
