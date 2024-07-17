@@ -7,22 +7,24 @@ import mongoose from 'mongoose';
 import connectMongoDBSession from 'connect-mongodb-session';
 import session from 'express-session';
 import dotenv from 'dotenv';
-import passport from 'passport';
+import path from 'path'
 
 import initializeRoutes from '../src/routes/index';
-import { googleAuth } from '../src/config/authentication'
 import sessionDts from '../types/session';
 import expressUserDts from '../types/express-user'
+import { upload } from './config/storage';
 
 const app = express()
 
 dotenv.config(); // Load environment variables
 
 // Initialize and configure middlewares
-app.use(cors({ credentials: true, origin: 'http://localhost:3000' }))
+app.use(cors({ credentials: true, origin: 'http://localhost:5500' }))
 app.use(compression())
 app.use(bodyParser.json())
 app.use(cookieParser())
+
+app.use(express.static(__dirname));
 
 // Configure session middlleware
 const MongoDBStore = connectMongoDBSession(session);
@@ -38,12 +40,11 @@ app.use(session({
   cookie: { maxAge: 1000 * 60 * 60 * 3, secure: false } // Set expiration time of cookie
 }))
 
-// Initialize passport and authenticate sessions
-app.use(passport.initialize())
-app.use(passport.session())
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'google.html')); // Adjust the path as needed
+});
 
-googleAuth() // Initialize google authentication strategy
-
+app.use(upload('images').single('profileImage')) // Initialize middleware to handle file uploads
 app.use('/api', initializeRoutes()) // Configure routes
 
 // Connect to database and start the server

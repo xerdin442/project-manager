@@ -1,49 +1,55 @@
-import passport from "passport";
-import { Strategy as GoogleStrategy, VerifyCallback } from 'passport-google-oauth2';
+import { OAuth2Client } from 'google-auth-library';
+import { User } from '../models/user';
+import { createUser } from '../services/user';
 
-import { User } from "../models/user";
-import { createUser } from "../services/user";
+const client = new OAuth2Client(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.GOOGLE_REDIRECT_URI
+);
 
-export const googleAuth = () => {
-  passport.use(new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: '/api/auth/google/redirect',
-      passReqToCallback: true
-    },
-    async (accessToken: string, refreshToken: string, profile: any, done: VerifyCallback) => {
-      try {
-        const user = await User.findOne({ googleId: profile.id }) // Check if user exists
-  
-        if (!user) {
-          const newUser = await createUser({
-            googleId: profile.id,
-            username: profile.displayName,
-            email: profile.emails?.[0].value
-          })
-          
-          done(null, newUser)
-        } else {
-          done(null, user)
-        }  
-      } catch (error) {
-        console.log(error)
-      }
-    }
-  ))
+export const getGoogleAuthUrl = () => {
+  const authUrl = client.generateAuthUrl({
+    access_type: 'offline',
+    scope: ['email', 'profile'],
+    redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+    client_id: process.env.GOOGLE_CLIENT_ID,
+  });
 
-  passport.serializeUser((user, done) => {
-    done(null, user.id)
-  })
+  return authUrl;
+};
 
-  passport.deserializeUser(async (id, done) => {
-    try {
-      const user = await User.findById(id)
-      done(null, user)
-    } catch (error) {
-      console.log(error)
-      done(null, false)
-    }
-  })
-}
+export const handleGoogleCallback = async (code: string) => {
+  const { tokens } = await client.getToken({
+    code,
+    redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+  });
+  client.setCredentials(tokens);
+
+  const ticket = await client.verifyIdToken({
+    idToken: tokens.id_token,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+
+  const payload = ticket.getPayload();
+
+  if (!payload) {
+    throw new Error('Google ID token verification failed');
+  }
+
+  const googleId = payload.sub;
+  const username = payload.name;
+  const email = payload.email;
+
+  let user = await User.findOne({ googleId });
+
+  if (!user) {
+    user = await createUser({
+      googleId,
+      username,
+      email,
+    });
+  }
+
+  return user;
+};
