@@ -1,4 +1,3 @@
-// types/session.d.ts
 import 'express-session';
 
 import { IUser } from '../src/models/user'

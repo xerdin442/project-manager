@@ -18,11 +18,16 @@ export const validateSignup: ValidationChain[] = [
     }),
 
   check('password').trim()
-    .isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
+    .isLength({ min: 8 }).withMessage('Password must be at least 6 characters')
     .custom((value: string) => {
-      const passwordStrengthCheck: RegExp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&_])[A-Za-z\d$@$!%*?&_]{6,}$/
+      const passwordStrengthCheck: RegExp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&_])[A-Za-z\d$@$!%*?&_]{8,}$/
       if (passwordStrengthCheck.test(value)) {
-        return Promise.reject(``)
+        return Promise.reject(`Password must contain;
+          At least one uppercase letter
+          At least one lowercase letter
+          At least one digit
+          At least one of the following symbols: $@$!%*?&_`
+        )
       }
     }),
 
@@ -54,11 +59,16 @@ export const validateLogin: ValidationChain[] = [
 
 export const validatePasswordReset: ValidationChain[] = [
   check('password').trim()
-    .isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
+    .isLength({ min: 8 }).withMessage('Password must be at least 6 characters')
     .custom(async (value: string, { req }) => {
-      const passwordStrengthCheck: RegExp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&_])[A-Za-z\d$@$!%*?&_]{6,}$/
+      const passwordStrengthCheck: RegExp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&_])[A-Za-z\d$@$!%*?&_]{8,}$/
       if (passwordStrengthCheck.test(value)) {
-        return Promise.reject(``)
+        return Promise.reject(`Password must contain;
+          At least one uppercase letter
+          At least one lowercase letter
+          At least one digit
+          At least one of the following symbols: $@$!%*?&_`
+        )
       }
 
       const user = await User.checkResetToken(req.query.resetToken)

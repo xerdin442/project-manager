@@ -24,7 +24,7 @@ app.use(cookieParser())
 
 app.use(express.static(__dirname));
 
-// Configure session middlleware
+// Configure session middleware
 const MongoDBStore = connectMongoDBSession(session);
 const store = new MongoDBStore({
   uri: process.env.MONGO_URI,
