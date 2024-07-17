@@ -3,11 +3,11 @@ import axios from 'axios';
 import { IUser } from '../models/user';
 
 export const sendEmail = async (receiver: IUser) => {
-  const url = 'https://api.brevo.com/v3/smtp/email'
+  const url = 'https://api.brevo.com/v3/smtp/email';
 
   const data = {
     sender: {
-      name: 'Project Manager Inc.',
+      name: 'Project Manager',
       email: 'mudianthonio27@gmail.com',
     },
     to: [
@@ -20,8 +20,9 @@ export const sendEmail = async (receiver: IUser) => {
     htmlContent: `
     <p>Hello ${receiver.username},</p>
     <h1>${receiver.resetToken}</h1>
-    <p>You requested for a password reset. The code expires in <b>90 seconds.</b></p>
-    <p>If this wasn't you, please ignore this email.</p>`
+    <p>You requested for a password reset. The code expires in <b>2 minutes.</b></p>
+    <p>If this wasn't you, please ignore this email.</p>
+    `
   };
 
   try {

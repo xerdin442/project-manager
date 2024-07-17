@@ -7,7 +7,7 @@ export interface IProject extends Document {
   description: string
   deadline: Date
   status: string
-  inviteToken: string
+  inviteToken: number
 }
 
 // Define the valid 'status' values
@@ -23,7 +23,7 @@ const projectSchema = new Schema<IProject>({
   description: { type: String, required: true },
   deadline: { type: Date, required: true },
   status: { type: String, enum: STATUS, required: true, default: 'In Progress' },
-  inviteToken: { type: String, required: true, unique: true }
+  inviteToken: { type: Number, required: true, unique: true }
 });
 
 export const Project = mongoose.model<IProject>('Project', projectSchema);

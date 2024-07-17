@@ -107,6 +107,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     await sendEmail(user) // Send reset token to the user's email address
     req.session.email = user.email // Save user's email address in a session incase the user requests for the token to be re-sent
   
+    console.log(token)
     return res.status(200).json({ message: 'A reset token has been sent to your email' }).end()
   } catch (error) {
     console.log(error)
@@ -134,12 +135,10 @@ export const checkResetToken = async (req: Request, res: Response) => {
     user.resetTokenExpiration = undefined
     await user.save()
 
-    // Check if email was stored earlier for resending tokens, and delete the session if it exists
-    if (req.session.email) {
-      req.session.destroy((err) => {
-        if (err) { console.log(err) }
-      })
-    }
+    // Delete session created earlier for storing email and resending tokens
+    req.session.destroy((err) => {
+      if (err) { console.log(err) }
+    })
 
     const redirectURL = `http://localhost:3000/api/auth/change-password?resetToken=${user.resetToken}`
     
@@ -158,13 +157,15 @@ export const resendToken = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'User not found' })
     }
 
-    // Generate new reset token, change the previous value and save changes
+    // Generate new reset token, reset the expiration time and save changes
     const token = Math.ceil(Math.random() * 10 ** 6)
     user.resetToken = token
+    user.resetTokenExpiration = Date.now() + 120000
     await user.save()
 
     await sendEmail(user) // Send email with new reset token to user
 
+    console.log(token)
     return res.status(200).json({ message: 'Another token has been sent to your email' })
   } catch (error) {
     console.log(error)

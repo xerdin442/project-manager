@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { v4 as generateToken } from 'uuid';
 
 import * as Project from '../services/project';
 
@@ -30,7 +29,7 @@ export const projectDetails = async (req: Request, res: Response) => {
 export const createProject = async (req: Request, res: Response) => {
   try {
     const { name, client, description, deadline } = req.body
-    const token = generateToken()
+    const token = Math.ceil(Math.random() * 10 ** 6)
     const userId = req.session.user._id
 
     const project = Project.createProject({
