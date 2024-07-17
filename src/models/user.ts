@@ -7,7 +7,7 @@ export interface IUser extends Document {
   profileImage: string
   password: string
   reminders: { project: Types.ObjectId, sender: Types.ObjectId, message: string }[],
-  resetToken?: string,
+  resetToken?: number,
   resetTokenExpiration?: Number
 }
 
@@ -22,7 +22,7 @@ const userSchema = new Schema<IUser>({
     sender: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
     message: { type: String, required: true }
   }],
-  resetToken: { type: String },
+  resetToken: { type: Number },
   resetTokenExpiration: { type: Number }
 })
 

@@ -31,7 +31,7 @@ export const createProject = async (req: Request, res: Response) => {
   try {
     const { name, client, description, deadline } = req.body
     const token = generateToken()
-    const userId = req.user._id || req.session.user._id
+    const userId = req.session.user._id
 
     const project = Project.createProject({
       name,
@@ -172,7 +172,7 @@ export const sendReminder = async (req: Request, res: Response) => {
   try {
     const { memberId, projectId } = req.params
     const { message } = req.body
-    const senderId = req.session.user.id || req.user.id
+    const senderId = req.session.user.id
 
     await Project.sendReminder(memberId, senderId, projectId, message)
 

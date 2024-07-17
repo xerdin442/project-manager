@@ -132,7 +132,7 @@ export const getUserTasks = async (req: Request, res: Response) => {
 export const getTasksPerProject = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
-    const userId = req.session.user._id || req.user.id
+    const userId = req.session.user.id
 
     const tasksPerProject = await User.getTasksPerProject(userId, projectId)
 

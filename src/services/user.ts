@@ -1,4 +1,6 @@
-import { User } from '../models/user';
+import { Response } from 'express';
+
+import { IUser, User } from '../models/user';
 import { Project } from '../models/project';
 import { Task } from '../models/task';
 import { populateTask } from './task';
@@ -67,12 +69,7 @@ export const getReminders = async (id: string) => {
 }
 
 export const checkResetToken = async (resetToken: string) => {
-  const user = await User.findOne({
-    resetToken: resetToken,
-    resetTokenExpiration: { $gt: Date.now() } // Check if token expiration date is higher than current date
-  }).select('+password')
-
-  return user;
+  return User.findOne({ resetToken })
 }
 
 export const getUserTasks = async (id: string) => {

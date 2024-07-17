@@ -93,7 +93,7 @@ export const getInviteLink = async (projectId: string) => {
 export const addMember = async (inviteToken: string, req: Request, res: Response) => {
   const project = await Project.findOne({ inviteToken })
   if (project) {
-    const userId = req.session.user._id || req.user.id
+    const userId = req.session.user.id
 
     // Check if the user is already a member
     const isMember = project.members.some(member => member.user.equals(userId));

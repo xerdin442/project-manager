@@ -1,6 +1,5 @@
 import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
-import { v4 as generateToken } from 'uuid'
 
 import * as User from '../services/user'
 import { addMember } from '../services/project'
@@ -37,7 +36,7 @@ export const register = async (req: Request, res: Response) => {
       profileImage
     })
 
-    return res.status(200).json(user).end() // Send a success message and the user information in JSON format
+    return res.status(200).json(user).end() // Send success message and user information
   } catch (error) {
     console.log(error)
     return res.sendStatus(500) // Send an error message if any server errors are encountered
@@ -79,32 +78,20 @@ export const login = async (req: Request, res: Response) => {
 }
 
 export const logout = (req: Request, res: Response) => {
-  if (req.user) {
-    req.logout(err => {
-      if (err) {
-        console.log(err)
-        return res.sendStatus(500)
-      }
+  req.session.destroy((err) => {
+    if (err) {
+      console.log(err)
+      return res.sendStatus(500)
+    }
 
-      return res.status(200).json({ message: 'You logged out' })
-    })
-  }
-
-  if (req.session.user) {
-    req.session.destroy((err) => {
-      if (err) {
-        console.log(err)
-        return res.sendStatus(500)
-      }
-
-      return res.status(200).json({ message: 'You logged out' })
-    })
-  }
+    return res.status(200).json({ message: 'You logged out' })
+  })
 }
 
 export const resetPassword = async (req: Request, res: Response) => {
   try {
     const { email } = req.body
+    const token = Math.ceil(Math.random() * 10 ** 6) // Generate reset token that will be sent to the user
 
     // Find user by email address and return an error if not found
     const user = await User.getUserByEmail(email)
@@ -112,33 +99,76 @@ export const resetPassword = async (req: Request, res: Response) => {
       return res.status(400).send('User with that email does not exist')
     }
   
-    // Continue if a user is found with the email address
-    user.resetToken = generateToken() // Generate a reset token to be sent to user
-    user.resetTokenExpiration = Date.now() + 3600000 // Set the expiration time of the token
-    await user.save() // Save changes
+    // If user check is successful, set the token, expiration time and save changes
+    user.resetToken = token
+    user.resetTokenExpiration = Date.now() + 90000
+    await user.save()
   
-    sendEmail(user) // Send reset link to the user's email address
+    sendEmail(user) // Send reset token to the user's email address
+    req.session.email = user.email // Save user's email address in a session incase the user requests for the token to be re-sent
   
-    return res.status(200).json({ message: 'A reset link has been sent to your email' }).end()
+    return res.status(200).json({ message: 'A reset token has been sent to your email' }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500) // Send an error message if any server errors are encountered
   }
 }
 
-export const getNewPassword = async (req: Request, res: Response) => {
+export const checkResetToken = async (req: Request, res: Response) => {
   try {
-    const { resetToken } = req.params
+    const { resetToken } = req.body
 
     const user = await User.checkResetToken(resetToken)
+    // Check if reset token is valid
     if (!user) {
       return res.status(400).send('Invalid reset token')
     }
 
-    return res.redirect(`/api/auth/change-password?resetToken=${user.resetToken}`)
+    const currentTime = new Number(Date.now())
+    // Check if reset token has expired
+    if (user.resetTokenExpiration < currentTime) {
+      return res.status(400).json({ message: 'The reset token has expired' })
+    }
+
+    // Reset token expiration time if the token is valid and save changes
+    user.resetTokenExpiration = undefined
+    await user.save()
+
+    // Check if email was stored earlier for resending tokens, and delete the session if it exists
+    if (req.session.email) {
+      req.session.destroy((err) => {
+        if (err) { console.log(err) }
+      })
+    }
+
+    const redirectURL = `http://localhost:3000/api/auth/change-password?resetToken=${user.resetToken}`
+    
+    return res.status(200).json({ redirectURL })
   } catch (error) {
     console.log(error)
     return res.sendStatus(500) // Send an error message if any server errors are encountered      
+  }
+}
+
+export const resendToken = async (req: Request, res: Response) => {
+  try {
+    // Check if user exists with the email stored in session
+    const user = await User.getUserByEmail(req.session.email)
+    if (!user) {
+      return res.status(400).json({ message: 'User not found' })
+    }
+
+    // Generate new reset token, change the previous value and save changes
+    const token = Math.ceil(Math.random() * 10 ** 6)
+    user.resetToken = token
+    await user.save()
+
+    sendEmail(user) // Send email with new reset token to user
+
+    return res.status(200).json({ message: 'Another token has been sent to your email' })
+  } catch (error) {
+    console.log(error)
+    return res.sendStatus(500) // Send an error message if any server errors are encountered
   }
 }
 
@@ -149,15 +179,13 @@ export const changePassword = async (req: Request, res: Response) => {
   
     const user = await User.checkResetToken(resetToken as string)
     if (!user) {
-      return res.status(400).send('Invalid reset token') // Send error message if token is invalid
+      return res.status(400).send('Invalid reset token') // Send error message if reset token is invalid
     }
   
-    // If reset token is valid, hash and update password and save changes
+    // If reset token is valid, change password, reset the token value and save changes
     const hashedPassword = await bcrypt.hash(password, 12)  
     user.password = hashedPassword
-    // Reset token value and expiration date after use
     user.resetToken = undefined
-    user.resetTokenExpiration = undefined
     await user.save()
   
     return res.status(200).send({ message: 'Password has been reset' })
@@ -173,8 +201,7 @@ export const getGoogleConsentPage = (req: Request, res: Response) => {
     return res.status(400).json({ message: 'Error generating google authentication link' })
   }
 
-  console.log(url)
-  return res.json({ url })
+  return res.status(200).json({ url })
 }
 
 export const handleGoogleRedirect = async (req: Request, res: Response) => {

@@ -11,7 +11,6 @@ import path from 'path'
 
 import initializeRoutes from '../src/routes/index';
 import sessionDts from '../types/session';
-import expressUserDts from '../types/express-user'
 import { upload } from './config/storage';
 
 const app = express()
@@ -19,7 +18,7 @@ const app = express()
 dotenv.config(); // Load environment variables
 
 // Initialize and configure middlewares
-app.use(cors({ credentials: true, origin: 'http://localhost:5500' }))
+app.use(cors({ credentials: true, origin: 'http://localhost:3000' }))
 app.use(compression())
 app.use(bodyParser.json())
 app.use(cookieParser())
@@ -44,7 +43,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'google.html')); // Adjust the path as needed
 });
 
-app.use(upload('images').single('profileImage')) // Initialize middleware to handle file uploads
+app.use(upload('images').single('profileImage')) // Initialize multer to handle file uploads
 app.use('/api', initializeRoutes()) // Configure routes
 
 // Connect to database and start the server

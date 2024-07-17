@@ -16,7 +16,7 @@ export const upload = (folderName: string) => {
   const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: (req, file) => {
-      const folder = path.join(path.dirname(require.main.filename), folderName)
+      const folder = path.join(__dirname, folderName)
       const format = path.extname(file.originalname).substring(1)
       const public_id = new Date().toISOString().replace(/:/g, '-') + '-' + file.originalname
 

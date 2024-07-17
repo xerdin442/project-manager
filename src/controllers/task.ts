@@ -12,7 +12,7 @@ export const assignTask = async (req: Request, res: Response) => {
     if (/yes/i.test(urgent)) { urgent = true }
 
     const member = await getUserById(memberId)
-    const adminId = req.session.user._id || req.user._id
+    const adminId = req.session.user._id
 
     const newTask = await Task.createTask({
       member: memberId,
