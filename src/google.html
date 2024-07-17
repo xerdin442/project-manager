@@ -1,0 +1,25 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fetch Example</title>
+</head>
+<body>
+  <button id="google-auth-btn">Login with Google</button>
+
+  <script>
+    document.getElementById('google-auth-btn').addEventListener('click', () => {
+      fetch('http://localhost:3000/api/auth/google')
+        .then(response => response.json())
+        .then(data => {
+          window.location.href = data.url;
+        })
+        .catch(error => {
+          console.error('Fetch error:', error);
+        });
+    });
+  </script>
+</body>
+</html>
