@@ -13,8 +13,4 @@ export default (router: express.Router) => {
   router.post('/auth/confirm-reset', Auth.checkResetToken)
   router.post('/auth/resend-token', Auth.resendToken)
   router.post('/auth/change-password', validatePasswordReset, handleValidationErrors, Auth.changePassword)
-
-  // Redirect to google consent screen after user opts to sign in with google
-  router.get('/auth/google', Auth.getGoogleConsentPage)
-  router.get('/auth/google/redirect', Auth.handleGoogleRedirect)
 }

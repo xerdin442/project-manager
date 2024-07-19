@@ -4,7 +4,6 @@ import bcrypt from 'bcryptjs'
 import * as User from '../services/user'
 import { addMember } from '../services/project'
 import { sendEmail } from '../util/mail'
-import { getGoogleAuthUrl, handleGoogleCallback } from '../config/authentication'
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -188,32 +187,5 @@ export const changePassword = async (req: Request, res: Response) => {
     // Log and send an error message if any server errors are encountered
     console.log(error)
     return res.sendStatus(500)
-  }
-}
-
-export const getGoogleConsentPage = (req: Request, res: Response) => {
-  const url = getGoogleAuthUrl()
-  if (!url) {
-    return res.status(400).json({ message: 'Error generating google authentication link' })
-  }
-
-  return res.status(200).json({ url })
-}
-
-export const handleGoogleRedirect = async (req: Request, res: Response) => {
-  try {
-    const { code } = req.query;
-    const user = await handleGoogleCallback(code as string);
-
-    if (!user) {
-      return res.status(400).send('An error occured during login')
-    }
-
-    req.session.user = user; // Configure session data for the newly logged in user
-    
-    return res.redirect(`/users/profile/${user.id}`);
-  } catch (error) {~
-    console.error(error)
-    return res.redirect('/auth/login');
   }
 }
