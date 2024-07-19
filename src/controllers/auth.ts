@@ -5,14 +5,11 @@ import * as User from '../services/user'
 import { addMember } from '../services/project'
 import { sendEmail } from '../util/mail'
 import { getGoogleAuthUrl, handleGoogleCallback } from '../config/authentication'
-import { validateRequest } from '../util/error'
 
 export const register = async (req: Request, res: Response) => {
   try {
     // Extract required fields from request body
     let { username, email, password, profileImage } = req.body
-
-    validateRequest(req, res) // Return any validation error messages
 
     /* Use a default image if user does not upload file
     Or set profileImage to path of stored image if user uploads file */
@@ -45,8 +42,6 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   try {
     const { email } = req.body // Extract required fields from request body
-
-    validateRequest(req, res) // Return any validation error messages
 
     // If all checks are successful, configure session data for newly logged in user
     const user = await User.getUserByEmail(email)
@@ -175,11 +170,10 @@ export const changePassword = async (req: Request, res: Response) => {
     const { resetToken } = req.query
     const { password } = req.body
 
-    validateRequest(req, res) // Return any validation error messages
-  
+    // Send error message if reset token is invalid
     const user = await User.checkResetToken(resetToken as string)
     if (!user) {
-      return res.status(400).send('Invalid reset token') // Send error message if reset token is invalid
+      return res.status(400).send('Invalid reset token')
     }
   
     // If reset token is valid, change password, reset the token value and save changes

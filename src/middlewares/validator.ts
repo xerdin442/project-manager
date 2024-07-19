@@ -1,5 +1,6 @@
-import { check, ValidationChain } from "express-validator";
+import { check, ValidationChain, validationResult } from "express-validator";
 import bcrypt from 'bcryptjs'
+import { NextFunction, Request, Response } from "express";
 
 import * as User from '../services/user'
 
@@ -13,29 +14,30 @@ export const validateSignup: ValidationChain[] = [
     .custom(async (value: string) => {
       const user = await User.getUserByEmail(value)
       if (user) {
-        return Promise.reject('User with that email address already exists')
+        throw new Error('User with that email address already exists')
       }
+
+      return true;
     }),
 
   check('password').trim()
-    .isLength({ min: 8 }).withMessage('Password must be at least 6 characters')
+    .isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
     .custom((value: string) => {
       const passwordStrengthCheck: RegExp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&_])[A-Za-z\d$@$!%*?&_]{8,}$/
-      if (passwordStrengthCheck.test(value)) {
-        return Promise.reject(`Password must contain;
-          At least one uppercase letter
-          At least one lowercase letter
-          At least one digit
-          At least one of the following symbols: $@$!%*?&_`
-        )
+      if (!passwordStrengthCheck.test(value)) {
+        throw new Error(`Password must contain at least one uppercase letter, one lowercase letter, one digit and one of the following symbols: $@$!%*?&_`)
       }
+
+      return true;
     }),
 
   check('confirmPassword').trim()
     .custom(async (value: string, { req }) => {
       if (value !== req.body.password) {
-        return Promise.reject('Passwords do not match!')
+        throw new Error('Passwords do not match!')
       }
+
+      return true;
     })
 ]
 
@@ -46,35 +48,45 @@ export const validateLogin: ValidationChain[] = [
       // Check the email and send an error message if it does not exist
       const user = await User.getUserByEmail(value).select('+password')
       if (!user) {
-        return Promise.reject('No user found with that email')
+        throw new Error('No user found with that email')
       }
 
       // Check the entered password and send an error message if it is invalid
       const checkPassword = await bcrypt.compare(req.body.password, user.password)
       if (!checkPassword) {
-        return Promise.reject('Invalid password')
+        throw new Error('Invalid password')
       }
+
+      return true;
     })
 ]
 
 export const validatePasswordReset: ValidationChain[] = [
   check('password').trim()
-    .isLength({ min: 8 }).withMessage('Password must be at least 6 characters')
+    .isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
     .custom(async (value: string, { req }) => {
       const passwordStrengthCheck: RegExp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&_])[A-Za-z\d$@$!%*?&_]{8,}$/
-      if (passwordStrengthCheck.test(value)) {
-        return Promise.reject(`Password must contain;
-          At least one uppercase letter
-          At least one lowercase letter
-          At least one digit
-          At least one of the following symbols: $@$!%*?&_`
-        )
+      if (!passwordStrengthCheck.test(value)) {
+        throw new Error(`Password must contain at least one uppercase letter, one lowercase letter, one digit and one of the following symbols: $@$!%*?&_`)
       }
 
       const user = await User.checkResetToken(req.query.resetToken)
       const checkMatch = await bcrypt.compare(value, user.password)
       if (checkMatch) {
-        return Promise.reject('New password cannot be set to same value as previous password')
+        throw new Error('New password cannot be set to same value as previous password')
       }
+
+      return true;
     }),
 ]
+
+export const handleValidationErrors = (req: Request, res: Response, next: NextFunction) => {
+  // Extract all validation errors, if any, and return the error message
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    const message = errors.array()[0].msg
+    return res.status(400).json({ message })
+  }
+
+  next() // Proceed to next middleware if there are no errors
+}
