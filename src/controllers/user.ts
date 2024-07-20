@@ -16,7 +16,6 @@ export const getAll = async (req: Request, res: Response) => {
 export const getProfile = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params
-
     const user = await User.getUserById(userId)
 
     return res.status(200).json(user).end()
@@ -48,7 +47,6 @@ export const updateProfile = async (req: Request, res: Response) => {
 export const deleteUser = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params
-
     await User.deleteUser(userId)
 
     return res.status(200).json({ message: 'User successfully deleted' })
@@ -79,7 +77,6 @@ export const getProjectsByRole = async (req: Request, res: Response) => {
 export const getUserProjects = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params
-
     const userProjects = await User.getUserProjects(userId)
 
     res.status(200).json(userProjects).end()
@@ -92,7 +89,6 @@ export const getUserProjects = async (req: Request, res: Response) => {
 export const getReminders = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params
-
     const reminders = await User.getReminders(userId)
 
     res.status(200).json(reminders).end()
@@ -105,7 +101,6 @@ export const getReminders = async (req: Request, res: Response) => {
 export const getUserTasks = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params
-
     const tasks = await User.getUserTasks(userId)
 
     res.status(200).json(tasks).end()
@@ -119,7 +114,6 @@ export const getTasksPerProject = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
     const userId = req.session.user.id
-
     const tasksPerProject = await User.getTasksPerProject(userId, projectId)
 
     res.status(200).json(tasksPerProject).end()

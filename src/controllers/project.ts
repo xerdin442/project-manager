@@ -16,7 +16,6 @@ export const getAll = async (req: Request, res: Response) => {
 export const projectDetails = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
-
     const project = await Project.getprojectById(projectId)
     const populatedProject = await Project.populateProject(project)
 
@@ -84,7 +83,6 @@ export const updateStatus = async (req: Request, res: Response) => {
 export const deleteProject = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
-
     await Project.deleteProject(projectId)
 
     return res.status(200).json({ message: 'Project deleted successfully' }).end()
@@ -97,7 +95,6 @@ export const deleteProject = async (req: Request, res: Response) => {
 export const getAllMembers = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
-
     const members = await Project.getAllMembers(projectId)
 
     return res.status(200).json(members).end()
@@ -115,7 +112,6 @@ export const getMembersByRole = async (req: Request, res: Response) => {
     if (!role) {
       return res.sendStatus(403).send('Role is not provided')
     }
-
     const membersByRole = await Project.getMembersByRole(projectId, role as string)
 
     return res.status(200).json(membersByRole).end()
@@ -128,7 +124,6 @@ export const getMembersByRole = async (req: Request, res: Response) => {
 export const addAdmin = async (req: Request, res: Response) => {
   try {
     const { projectId, memberId } = req.params
-
     const updatedAdmins = await Project.addAdmin(projectId, memberId)
 
     return res.status(200).json(updatedAdmins).end()
@@ -141,7 +136,6 @@ export const addAdmin = async (req: Request, res: Response) => {
 export const deleteMember = async (req: Request, res: Response) => {
   try {
     const { projectId, memberId } = req.params
-
     const updatedMembers = await Project.deleteMember(projectId, memberId)
 
     return res.status(200).json(updatedMembers).end()
@@ -169,7 +163,6 @@ export const sendReminder = async (req: Request, res: Response) => {
 export const getInviteLink = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
-
     const inviteLink = await Project.getInviteLink(projectId)
   
     return res.status(200).json(inviteLink).end()  
@@ -188,7 +181,6 @@ export const acceptInvite = async (req: Request, res: Response) => {
 export const getProgress = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
-
     const progress = await Project.getProgress(projectId)
 
     return res.status(200).json(progress).end()

@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import { NextFunction, Request, Response } from "express";
 
 import * as User from '../services/user'
+import { deleteUpload } from "../config/storage";
 
 export const validateSignup: ValidationChain[] = [
   check('username').trim()
@@ -85,6 +86,15 @@ export const handleValidationErrors = (req: Request, res: Response, next: NextFu
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     const message = errors.array()[0].msg
+
+    // Check for any uploaded image and delete from cloud storage
+    if (req.file && req.file.path) {
+      // Extract the public ID of the image from the file path
+      const publicId = req.file.path.split('/').slice(-2).join('/').replace(/\.[^/.]+$/, "");
+
+      deleteUpload(publicId) // Delete the uploaded image from Cloudinary
+    }
+
     return res.status(422).json({ message })
   }
 
