@@ -18,8 +18,9 @@ export const projectDetails = async (req: Request, res: Response) => {
     const { projectId } = req.params
 
     const project = await Project.getprojectById(projectId)
+    const populatedProject = await Project.populateProject(project)
 
-    return res.status(200).json(project).end()
+    return res.status(200).json(populatedProject).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -32,11 +33,12 @@ export const createProject = async (req: Request, res: Response) => {
     const token = Math.ceil(Math.random() * 10 ** 6)
     const userId = req.session.user._id
 
-    const project = Project.createProject({
+    const project = await Project.createProject({
       name,
       members: [{
         user: userId,
-        role: "admin"
+        role: "admin",
+        owner: true
       }],
       client,
       description,
@@ -44,7 +46,7 @@ export const createProject = async (req: Request, res: Response) => {
       inviteToken: token
     })
 
-    return res.status(200).json(project).end()
+    return res.status(200).json({ project }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -105,36 +107,18 @@ export const getAllMembers = async (req: Request, res: Response) => {
   }
 }
 
-export const getMembers = async (req: Request, res: Response) => {
+export const getMembersByRole = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
     const { role } = req.query
 
-    if (role !== 'member') {
-      return res.sendStatus(403)
+    if (!role) {
+      return res.sendStatus(403).send('Role is not provided')
     }
 
-    const projectMembers = await Project.getMembersByRole(projectId, role)
+    const membersByRole = await Project.getMembersByRole(projectId, role as string)
 
-    return res.status(200).json(projectMembers).end()
-  } catch (error) {
-    console.log(error)
-    return res.sendStatus(500)
-  }
-}
-
-export const getAdmins = async (req: Request, res: Response) => {
-  try {
-    const { projectId } = req.params
-    const { role } = req.query
-
-    if (role !== 'admin') {
-      return res.sendStatus(403)
-    }
-
-    const projectAdmins = await Project.getMembersByRole(projectId, role)
-
-    return res.status(200).json(projectAdmins).end()
+    return res.status(200).json(membersByRole).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -171,7 +155,7 @@ export const sendReminder = async (req: Request, res: Response) => {
   try {
     const { memberId, projectId } = req.params
     const { message } = req.body
-    const senderId = req.session.user.id
+    const senderId = req.session.user._id.toString()
 
     await Project.sendReminder(memberId, senderId, projectId, message)
 

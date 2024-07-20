@@ -48,8 +48,8 @@ export const login = async (req: Request, res: Response) => {
 
     /* When a user is redirected to the login page after clicking an invite,
     check for query parameters and add user as project member */
-    const { inviteToken } = req.params
-    if (inviteToken) { addMember(inviteToken, req, res) }
+    const { inviteToken } = req.query
+    if (inviteToken) { return addMember(inviteToken as string, req, res) }
 
     return res.status(200).json({ message: 'Login successful' }).end() // Send a success message if login is complete
   } catch (error) {
@@ -112,8 +112,7 @@ export const checkResetToken = async (req: Request, res: Response) => {
     }
 
     // Check if reset token has expired
-    const currentTime = new Number(Date.now())
-    if (user.resetTokenExpiration < currentTime) {
+    if (user.resetTokenExpiration < Date.now()) {
       return res.status(400).json({ message: 'The reset token has expired' })
     }
 

@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface IProject extends Document {
   name: string
-  members: { user: Types.ObjectId, role: string }[]
+  members: { user: Types.ObjectId, role: string, owner: boolean }[]
   client: string
   description: string
   deadline: Date
@@ -17,7 +17,8 @@ const projectSchema = new Schema<IProject>({
   name: { type: String, required: true },
   members: [{
     user: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
-    role: { type: String, required: true }
+    role: { type: String, required: true },
+    owner: { type: Boolean, required: true }
   }],
   client: { type: String, required: true },
   description: { type: String, required: true },

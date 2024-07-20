@@ -8,7 +8,7 @@ export interface IUser extends Document {
   password: string
   reminders: { project: Types.ObjectId, sender: Types.ObjectId, message: string }[],
   resetToken?: number,
-  resetTokenExpiration?: Number
+  resetTokenExpiration?: number
 }
 
 const userSchema = new Schema<IUser>({

@@ -1,6 +1,4 @@
-import { Response } from 'express';
-
-import { IUser, User } from '../models/user';
+import { User } from '../models/user';
 import { Project } from '../models/project';
 import { Task } from '../models/task';
 import { populateTask } from './task';

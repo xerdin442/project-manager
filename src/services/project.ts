@@ -5,14 +5,6 @@ import { Project, IProject } from '../models/project';
 import { getUserById } from './user';
 import { getProjectTasks } from './task';
 
-export const getAll = () => {
-  return Project.find()
-}
-
-export const getprojectById = (id: string) => {
-  return Project.findById(id)
-}
-
 export const populateProject = async (project: IProject) => {
   const populatedProject = await Project.findById(project._id)
   .populate({ path: 'members.user', select: 'username profileImage' }).exec()
@@ -20,13 +12,23 @@ export const populateProject = async (project: IProject) => {
   return populatedProject;
 }
 
+export const getAll = async () => {
+  const projects = await Project.find()
+  const populatedProjects = projects.map(async project => await populateProject(project))
+
+  return await Promise.all(populatedProjects);
+}
+
+export const getprojectById = (id: string) => {
+  return Project.findById(id)
+}
+
 export const createProject = async (values: Record<string, any>) => {
   const project = new Project(values)
   await project.save();
 
   const populatedProject = await populateProject(project)
-  
-  return populatedProject.toObject();
+  return populatedProject;
 }
 
 export const updateProject = async (id: string, values: Record<string, any>) => {
@@ -42,7 +44,7 @@ export const deleteProject = (id: string) => {
 export const getMembersByRole = async (id: string, role: string) => {
   const project = await getprojectById(id)
   const populatedProject = await populateProject(project)
-  const membersByRole = populatedProject.members.filter(member => role === member.role);
+  const membersByRole = populatedProject.members.filter(member => { return role === member.role });
 
   return membersByRole;
 }
@@ -98,10 +100,10 @@ export const addMember = async (inviteToken: string, req: Request, res: Response
     // Check if the user is already a member
     const isMember = project.members.some(member => member.user.equals(userId));
     if (!isMember) {
-      project.members.push({ user: userId, role: 'member' });
+      project.members.push({ user: userId, role: 'member', owner: false });
       await project.save();
 
-      return res.status(200).json({ message: `You have joined ${project.name} as a member!` }).end()
+      return res.status(200).json({ message: `You have joined "${project.name}" as a member!` }).end()
     } else {
       return res.status(400).send('You are already a member of this project')
     }
