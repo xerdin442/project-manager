@@ -6,7 +6,7 @@ export interface IUser extends Document {
   email: string
   profileImage: string
   password: string
-  reminders: { project: Types.ObjectId, sender: Types.ObjectId, message: string }[],
+  reminders: { _id: Types.ObjectId, project: Types.ObjectId, sender: Types.ObjectId, message: string }[],
   resetToken?: number,
   resetTokenExpiration?: number
 }
@@ -18,6 +18,7 @@ const userSchema = new Schema<IUser>({
   profileImage: { type: String, required: true },
   password: { type: String, required: true, select: false },
   reminders: [{
+    _id: { type: Schema.Types.ObjectId, auto: true },
     project: { type: Schema.Types.ObjectId, required: true, ref: 'Project' },
     sender: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
     message: { type: String, required: true }

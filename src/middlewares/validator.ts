@@ -5,7 +5,7 @@ import { NextFunction, Request, Response } from "express";
 import * as User from '../services/user'
 import { deleteUpload } from "../config/storage";
 
-export const validateSignup: ValidationChain[] = [
+export const validateUserDetails: ValidationChain[] = [
   check('username').trim()
     .isLength({ min: 5 }).withMessage('Username must be at least 5 characters')
     .isLength({ max: 30 }).withMessage('Username cannot be more than 30 characters'),
@@ -79,6 +79,24 @@ export const validatePasswordReset: ValidationChain[] = [
 
       return true;
     }),
+]
+
+export const validateTaskDetails: ValidationChain[] = [
+  check('description').trim()
+    .isLength({ min: 10 }).withMessage('Task description must be at least 10 characters')
+    .isLength({ max: 500 }).withMessage('Task description cannot be more than 500 characters'),
+
+  check('deadline').isISO8601().withMessage('Invalid input. Deadline must be a date value'),
+
+  check('urgent').trim()
+    .custom((value: string) => {
+      const inputCheck = /^(yes|no)$/i
+      if (!inputCheck.test(value)) {
+        throw new Error('Invalid input provided for "urgent" field')
+      }
+
+      return true
+    })
 ]
 
 export const handleValidationErrors = (req: Request, res: Response, next: NextFunction) => {

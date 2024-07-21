@@ -2,8 +2,8 @@ import mongoose from 'mongoose';
 import { Request, Response } from 'express';
 
 import { Project, IProject } from '../models/project';
-import { getUserById } from './user';
 import { getProjectTasks } from './task';
+import { User } from '../models/user';
 
 export const populateProject = async (project: IProject) => {
   const populatedProject = await Project.findById(project._id)
@@ -74,13 +74,13 @@ export const addAdmin = async (projectId: string, userId: string) => {
 }
 
 export const sendReminder = async (memberId: string, senderId: string, projectId: string, message: string) => {
-  const member = await getUserById(memberId)
-
-  member.reminders.push({
-    project: new mongoose.Types.ObjectId(projectId),
-    sender: new mongoose.Types.ObjectId(senderId),
-    message: message
-  })
+  const member = await User.findByIdAndUpdate(memberId, 
+    { $push: { 
+      reminders: {
+        project: new mongoose.Types.ObjectId(projectId),
+        sender: new mongoose.Types.ObjectId(senderId),
+        message
+    }}}, { new: true })
 
   return member.save()
 }

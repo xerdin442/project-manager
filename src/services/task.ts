@@ -6,7 +6,7 @@ export const populateTask = async (task: ITask) => {
     { path: 'project', select: '-inviteToken' },
     { path: 'assignedBy', select: 'username profileImage' },
     { path: 'member', select: 'username profileImage' }
-  ]).exec()
+  ]).exec();
 
   return populatedTask;
 }
@@ -16,7 +16,6 @@ export const createTask = async (values: Record<string, any>) => {
   await task.save();
 
   const populatedTask = await populateTask(task)
-
   return populatedTask.toObject();
 }
 
@@ -52,7 +51,7 @@ export const getSubmittedTasks = async (projectId: string) => {
 
 export const populateComment = async (comment: IComment) => {
   // Populate the user field with username and profile image
-  const populatedComment = await Comment.findById(comment._id).populate('user', 'username profileImage').exec();
+  const populatedComment = await Comment.findById(comment.id).populate('user', 'username profileImage').exec();
 
   // Recursively populate the replies and sub-replies of the comment
   if (populatedComment.replies.length !== 0) {
@@ -71,7 +70,7 @@ export const createComment = async (taskId: string, values: Record<string, any>)
 
   // Find the task and append the comment to the task's comments array
   const task = await Task.findById(taskId)
-  task.comments.push(task._id as Types.ObjectId)
+  task.comments.push(comment._id as Types.ObjectId)
   await task.save()
 
   return await populateComment(comment)
@@ -93,7 +92,7 @@ export const getCommentsPerTask = async (taskId: string) => {
   const task = await Task.findById(taskId)
 
   const comments = task.comments.map(async commentId => {
-    const comment = await Comment.findById(commentId)
+    const comment = await Comment.findById(commentId.toString())
     return await populateComment(comment)
   })
 

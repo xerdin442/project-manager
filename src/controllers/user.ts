@@ -79,7 +79,7 @@ export const getUserProjects = async (req: Request, res: Response) => {
     const { userId } = req.params
     const userProjects = await User.getUserProjects(userId)
 
-    res.status(200).json(userProjects).end()
+    return res.status(200).json(userProjects).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -91,7 +91,19 @@ export const getReminders = async (req: Request, res: Response) => {
     const { userId } = req.params
     const reminders = await User.getReminders(userId)
 
-    res.status(200).json(reminders).end()
+    return res.status(200).json(reminders).end()
+  } catch (error) {
+    console.log(error)
+    return res.sendStatus(500)
+  }
+}
+
+export const deleteReminder = async (req: Request, res: Response) => {
+  try {
+    const { userId, reminderId } = req.params
+    await User.deleteReminder(userId, reminderId)
+
+    return res.status(200).json({ message: "Reminder successfully deleted!" }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -112,8 +124,7 @@ export const getUserTasks = async (req: Request, res: Response) => {
 
 export const getTasksPerProject = async (req: Request, res: Response) => {
   try {
-    const { projectId } = req.params
-    const userId = req.session.user.id
+    const { projectId, userId } = req.params
     const tasksPerProject = await User.getTasksPerProject(userId, projectId)
 
     res.status(200).json(tasksPerProject).end()

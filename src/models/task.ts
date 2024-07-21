@@ -22,7 +22,7 @@ const commentSchema = new Schema<IComment>({
   content: { type: String, required: true },
   replies: [{ type: Schema.Types.ObjectId, ref: 'Comment' }]
 })
-export const Comment = mongoose.model<IComment>('Task', commentSchema);
+export const Comment = mongoose.model<IComment>('Comment', commentSchema);
 
 // Define the valid 'priority' and 'status' values
 const STATUS: string[] = ['To-do', 'Completed', 'Awaiting Review']

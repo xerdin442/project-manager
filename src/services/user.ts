@@ -66,8 +66,16 @@ export const getReminders = async (id: string) => {
   return user.reminders;
 }
 
+export const deleteReminder = async (userId: string, reminderId: string) => {
+  const user = await getUserById(userId)
+  user.reminders = user.reminders.filter(reminder => reminder._id.toString() !== reminderId)
+  
+  return user.save()
+}
+
 export const checkResetToken = async (resetToken: string) => {
-  return User.findOne({ resetToken })
+  const token = Number(resetToken)
+  return User.findOne({ resetToken: token })
 }
 
 export const getUserTasks = async (id: string) => {

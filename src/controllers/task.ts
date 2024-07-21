@@ -2,17 +2,16 @@ import { Request, Response } from 'express';
 
 import { getUserById } from '../services/user';
 import * as Task from '../services/task';
+import { sendReminder } from '../services/project';
 
 export const assignTask = async (req: Request, res: Response) => {
   try {
     const { projectId, memberId } = req.params
-    const { description, deadline } = req.body
-
-    let urgent = req.body.urgent
-    if (/yes/i.test(urgent)) { urgent = true }
-
+    const { description, deadline, urgent } = req.body
+    
     const member = await getUserById(memberId)
     const adminId = req.session.user._id
+    const isUrgent = /yes/i.test(urgent);
 
     const newTask = await Task.createTask({
       member: memberId,
@@ -20,9 +19,8 @@ export const assignTask = async (req: Request, res: Response) => {
       assignedBy: adminId,
       deadline,
       description,
-      urgent
+      urgent: isUrgent
     })
-    await newTask.save()
 
     return res.status(200).json({ message: `Task has been assigned to ${member.username}`, task: newTask }).end()
   } catch (error) {
@@ -34,11 +32,11 @@ export const assignTask = async (req: Request, res: Response) => {
 export const updateTask = async (req: Request, res: Response) => {
   try {
     const { taskId } = req.params
-    const { description, urgent } = req.body
+    const { description, urgent, deadline } = req.body
 
-    const updatedTask = await Task.updateTask(taskId, { description, urgent })
+    const updatedTask = await Task.updateTask(taskId, { description, urgent, deadline })
 
-    return res.status(200).json(updatedTask).end()
+    return res.status(200).json({ message: "Task details updated successfully!", task: updatedTask }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -50,7 +48,16 @@ export const submitTask = async (req: Request, res: Response) => {
     const { taskId } = req.params
     const updatedTask = await Task.updateTask(taskId, { status: 'Awaiting Review' })
 
-    return res.status(200).json(updatedTask).end()
+    const receiver = updatedTask.assignedBy.toString()
+    const sender = req.session.user._id.toString()
+    const project = updatedTask.project.toString()
+    const taskInfo = updatedTask.description.slice(0, 35)
+    const message = `"${taskInfo}..."
+      New task has been submitted, awaiting your review`
+
+    await sendReminder(receiver, sender, project, message)
+
+    return res.status(200).json({ message: "Task submitted successfully, awaiting review...", task: updatedTask }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -62,7 +69,37 @@ export const approveTask = async (req: Request, res: Response) => {
     const { taskId } = req.params
     const updatedTask = await Task.updateTask(taskId, { status: 'Completed' })
 
-    return res.status(200).json(updatedTask).end()
+    const receiver = updatedTask.member.toString()
+    const sender = req.session.user._id.toString()
+    const project = updatedTask.project.toString()
+    const taskInfo = updatedTask.description.slice(0, 35)
+    const message = `"${taskInfo}..."
+      Task has been approved. Start working on the next!`
+
+    await sendReminder(receiver, sender, project, message)
+
+    return res.status(200).json({ message: "Task has been approved and marked as 'Completed'", task: updatedTask }).end()
+  } catch (error) {
+    console.log(error)
+    return res.sendStatus(500)
+  }
+}
+
+export const rejectTask = async (req: Request, res: Response) => {
+  try {
+    const { taskId } = req.params
+    const updatedTask = await Task.updateTask(taskId, { status: 'To-do' })
+
+    const receiver = updatedTask.member.toString()
+    const sender = req.session.user._id.toString()
+    const project = updatedTask.project.toString()
+    const taskInfo = updatedTask.description.slice(0, 35)
+    const message = `"${taskInfo}..."
+      Task has been rejected. Check comments to see the reasons!`
+    
+    await sendReminder(receiver, sender, project, message)
+
+    return res.status(200).json({ message: "Task has been rejected. Leave a comment on the reason for rejection", task: updatedTask }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)

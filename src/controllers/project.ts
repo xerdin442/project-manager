@@ -183,7 +183,7 @@ export const getProgress = async (req: Request, res: Response) => {
     const { projectId } = req.params
     const progress = await Project.getProgress(projectId)
 
-    return res.status(200).json(progress).end()
+    return res.status(200).json({ progress: `${progress}%` }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
