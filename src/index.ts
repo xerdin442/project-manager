@@ -16,7 +16,7 @@ const app = express()
 dotenv.config(); // Load environment variables
 
 // Initialize and configure middlewares
-app.use(cors({ credentials: true, origin: 'http://localhost:3000' }))
+app.use(cors({ credentials: true }))
 app.use(compression())
 app.use(bodyParser.json())
 app.use(cookieParser())
@@ -37,12 +37,8 @@ app.use(session({
 
 app.use('/api', routes)
 
-const options = {
-  ssl: true, // Ensure SSL is enabled
-};
-
 // Connect to database and start the server
-mongoose.connect(process.env.MONGO_URI, options)
+mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     app.listen(process.env.PORT)
     console.log('Server is running on port 3000')
