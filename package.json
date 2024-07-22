@@ -26,12 +26,12 @@
     "@types/express-validator": "^3.0.0",
     "@types/mongoose": "^5.11.97",
     "@types/multer": "^1.4.11",
+    "@types/node": "^20.14.11",
     "nodemon": "^3.1.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.3"
   },
   "dependencies": {
-    "@types/node": "^20.14.11",
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
