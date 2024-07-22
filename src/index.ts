@@ -8,7 +8,7 @@ import connectMongoDBSession from 'connect-mongodb-session';
 import session from 'express-session';
 import dotenv from 'dotenv';
 
-import routes from './routes/index';
+import router from './routes/index';
 import sessionDts from '../types/session';
 
 const app = express()
@@ -35,7 +35,7 @@ app.use(session({
   cookie: { maxAge: 1000 * 60 * 60 * 3, secure: false } // Set expiration time of cookie
 }))
 
-app.use('/api', routes)
+app.use('/api', router())
 
 // Connect to database and start the server
 mongoose.connect(process.env.MONGO_URI)
