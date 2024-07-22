@@ -35,7 +35,7 @@ app.use(session({
   cookie: { maxAge: 1000 * 60 * 60 * 3, secure: false } // Set expiration time of cookie
 }))
 
-app.use('api', routes)
+app.use('/api', routes)
 
 const options = {
   ssl: true, // Ensure SSL is enabled
