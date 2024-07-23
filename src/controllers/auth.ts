@@ -179,6 +179,12 @@ export const changePassword = async (req: Request, res: Response) => {
       return res.status(400).send('Invalid reset token')
     }
   
+    // Check if new passowrd matches previous password
+    const checkMatch = await bcrypt.compare(password, user.password)
+    if (checkMatch) {
+      return res.status(400).json({ message: 'New password cannot be set to same value as previous password' })
+    }
+
     // If reset token is valid, change password, reset the token value and save changes
     const hashedPassword = await bcrypt.hash(password, 12)
     if (!hashedPassword) {

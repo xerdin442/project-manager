@@ -71,16 +71,6 @@ export const validatePasswordReset: ValidationChain[] = [
         throw new Error(`Password must contain at least one uppercase letter, one lowercase letter, one digit and one of the following symbols: $@$!%*?&_`)
       }
 
-      const user = await User.checkResetToken(req.query.resetToken as string)
-      if (!user) {
-        throw new Error('An error occured while fetching user by reset token')
-      }
-      
-      const checkMatch = await bcrypt.compare(value, user.password)
-      if (checkMatch) {
-        throw new Error('New password cannot be set to same value as previous password')
-      }
-
       return true;
     }),
 ]
