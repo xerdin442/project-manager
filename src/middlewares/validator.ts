@@ -110,6 +110,39 @@ export const validateTaskDetails: ValidationChain[] = [
     })
 ]
 
+export const validateProjectDetails: ValidationChain[] = [
+  check('description').trim()
+    .isLength({ min: 10 }).withMessage('Project description must be at least 10 characters')
+    .isLength({ max: 500 }).withMessage('Project description cannot be more than 500 characters'),
+
+  check('deadline').isISO8601().withMessage('Invalid input. Deadline must be a date value'),
+
+  check(['name', 'client']).trim()
+  .isLength({ min: 5 }).withMessage('Project or client name must be at least 5 characters')
+  .isLength({ max: 30 }).withMessage('Project or client name cannot be more than 30 characters'),
+]
+
+export const validateProjectStatus: ValidationChain[] = [
+  check('status').trim()
+    .custom((value: string) => {
+      const status = ['In Progress', 'Completed', 'Archived', 'Cancelled']
+      const editedValue = value.split(' ').map(word => word[0].toUpperCase() + word.substring(1)).join(' ')
+
+      const isValid = status.some(status => status === editedValue)
+      if (!isValid) {
+        throw new Error('Invalid value for status')
+      }
+
+      return true;
+    })
+]
+
+export const validateContentLength: ValidationChain[] = [
+  check('message' || 'content').trim()
+  .isLength({ min: 10 }).withMessage('Content must be at least 10 characters')
+  .isLength({ max: 256 }).withMessage('Content cannot be more than 256 characters')
+]
+
 export const handleValidationErrors = (req: Request, res: Response, next: NextFunction) => {
   // Extract all validation errors, if any, and return the error message
   const errors = validationResult(req)
