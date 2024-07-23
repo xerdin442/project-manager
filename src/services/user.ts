@@ -88,7 +88,7 @@ export const deleteReminder = async (userId: string, reminderId: string) => {
 
 export const checkResetToken = async (resetToken: string) => {
   const token = Number(resetToken)
-  return User.findOne({ resetToken: token })
+  return User.findOne({ resetToken: token }).select('+password')
 }
 
 export const getUserTasks = async (id: string) => {
