@@ -90,7 +90,7 @@ export const resetPassword = async (req: Request, res: Response) => {
   
     // If user check is successful, set the token, expiration time and save changes
     user.resetToken = token
-    user.resetTokenExpiration = Date.now() + 90000
+    user.resetTokenExpiration = Date.now() + (3 * 60 * 60 * 1000)
     await user.save()
   
     await sendEmail(user) // Send reset token to the user's email address

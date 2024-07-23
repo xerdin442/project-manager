@@ -20,7 +20,7 @@ export const sendEmail = async (receiver: IUser) => {
     htmlContent: `
     <p>Hello ${receiver.username},</p>
     <h1>${receiver.resetToken}</h1>
-    <p>You requested for a password reset. The code expires in <b>2 minutes.</b></p>
+    <p>You requested for a password reset. This code expires in <b>3 hours.</b></p>
     <p>If this wasn't you, please ignore this email.</p>
     `
   };
