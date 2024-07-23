@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { Types } from 'mongoose';
 
 import * as Project from '../services/project';
 
@@ -19,6 +20,9 @@ export const getAll = async (req: Request, res: Response) => {
 export const projectDetails = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
+    if (!Types.ObjectId.isValid(projectId)) {
+      return res.status(400).json({ message: "Invalid project ID" })
+    }
 
     const project = await Project.getprojectById(projectId)
     if (!project) {
@@ -50,6 +54,7 @@ export const createProject = async (req: Request, res: Response) => {
       deadline,
       inviteToken: token
     })
+
     if (!project) {
       return res.status(400).json({ message: "An error occured while creating new project" })
     }
@@ -64,8 +69,11 @@ export const createProject = async (req: Request, res: Response) => {
 export const updateProject = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
-    const { name, client, description, deadline } = req.body
+    if (!Types.ObjectId.isValid(projectId)) {
+      return res.status(400).json({ message: "Invalid project ID" })
+    }
 
+    const { name, client, description, deadline } = req.body
     const project = await Project.updateProject(projectId, { name, client, description, deadline })
     if (!project) {
       return res.status(400).json({ message: "An error occured while updating project details" })
@@ -81,8 +89,11 @@ export const updateProject = async (req: Request, res: Response) => {
 export const updateStatus = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
-    const { status } = req.body
+    if (!Types.ObjectId.isValid(projectId)) {
+      return res.status(400).json({ message: "Invalid project ID" })
+    }
 
+    const { status } = req.body
     const project = await Project.updateProject(projectId, { status })
     if (!project) {
       return res.status(400).json({ message: "An error occured while updating project status" })
@@ -98,6 +109,10 @@ export const updateStatus = async (req: Request, res: Response) => {
 export const deleteProject = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
+    if (!Types.ObjectId.isValid(projectId)) {
+      return res.status(400).json({ message: "Invalid project ID" })
+    }
+
     await Project.deleteProject(projectId)
 
     return res.status(200).json({ message: 'Project deleted successfully' }).end()
@@ -110,6 +125,9 @@ export const deleteProject = async (req: Request, res: Response) => {
 export const getAllMembers = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
+    if (!Types.ObjectId.isValid(projectId)) {
+      return res.status(400).json({ message: "Invalid project ID" })
+    }
 
     const members = await Project.getAllMembers(projectId)
     if (!members) {
@@ -126,6 +144,9 @@ export const getAllMembers = async (req: Request, res: Response) => {
 export const getMembersByRole = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
+    if (!Types.ObjectId.isValid(projectId)) {
+      return res.status(400).json({ message: "Invalid project ID" })
+    }
     
     const { role } = req.query
     if (!role) {
@@ -147,6 +168,9 @@ export const getMembersByRole = async (req: Request, res: Response) => {
 export const addAdmin = async (req: Request, res: Response) => {
   try {
     const { projectId, memberId } = req.params
+    if (!Types.ObjectId.isValid(projectId) || !Types.ObjectId.isValid(memberId)) {
+      return res.status(400).json({ message: "Invalid project ID or member ID" })
+    }
 
     const updatedAdmins = await Project.addAdmin(projectId, memberId)
     if (!updatedAdmins) {
@@ -163,6 +187,9 @@ export const addAdmin = async (req: Request, res: Response) => {
 export const deleteMember = async (req: Request, res: Response) => {
   try {
     const { projectId, memberId } = req.params
+    if (!Types.ObjectId.isValid(projectId) || !Types.ObjectId.isValid(memberId)) {
+      return res.status(400).json({ message: "Invalid project ID or member ID" })
+    }
 
     const updatedMembers = await Project.deleteMember(projectId, memberId)
     if (!updatedMembers) {
@@ -179,9 +206,12 @@ export const deleteMember = async (req: Request, res: Response) => {
 export const sendReminder = async (req: Request, res: Response) => {
   try {
     const { memberId, projectId } = req.params
+    if (!Types.ObjectId.isValid(projectId) || !Types.ObjectId.isValid(memberId)) {
+      return res.status(400).json({ message: "Invalid project ID or member ID" })
+    }
+
     const { message } = req.body
     const senderId = req.session.user._id.toString()
-
     await Project.sendReminder(memberId, senderId, projectId, message, res)
 
     return res.status(200).json({ message: 'Your reminder has been sent!' }).end()
@@ -194,6 +224,9 @@ export const sendReminder = async (req: Request, res: Response) => {
 export const getInviteLink = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
+    if (!Types.ObjectId.isValid(projectId)) {
+      return res.status(400).json({ message: "Invalid project ID" })
+    }
 
     const inviteLink = await Project.getInviteLink(projectId)
     if (!inviteLink) {
@@ -216,6 +249,9 @@ export const acceptInvite = async (req: Request, res: Response) => {
 export const getProgress = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
+    if (!Types.ObjectId.isValid(projectId)) {
+      return res.status(400).json({ message: "Invalid project ID" })
+    }
 
     const progress = await Project.getProgress(projectId)
     if (!progress) {

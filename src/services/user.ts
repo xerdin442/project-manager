@@ -18,6 +18,9 @@ export const getUserByEmail = (email: string) => {
 
 export const createUser = async (values: Record<string, any>) => {
   const user = new User(values)
+  if (!user) {
+    throw new Error('An error occured while creating new user')
+  }
   await user.save();
   
   return user.toObject();
@@ -33,6 +36,9 @@ export const deleteUser = (id: string) => {
 
 export const getProjectsByRole = async (id: string, role: string) => {
   const projects = await Project.find()
+  if (!projects) {
+    throw new Error('An error occured while fetching all projects')
+  }
 
   const projectsByRole = projects.filter(project => {
     return project.members.filter(member => member.user.equals(id) && role === member.role);
@@ -46,6 +52,9 @@ export const getProjectsByRole = async (id: string, role: string) => {
 
 export const getUserProjects = async (id: string) => {
   const projects = await Project.find()
+  if (!projects) {
+    throw new Error('An error occured while fetching all projects')
+  }
 
   const userProjects = projects.filter(project => {
     return project.members.filter(member => member.user.equals(id));
@@ -62,6 +71,10 @@ export const getReminders = async (id: string) => {
     { path: 'reminders.project', select: 'name deadline' },
     { path: 'reminders.sender', select: 'username profileImage' }
   ]).exec()
+
+  if (!user) {
+    throw new Error('An error occured while fetching reminders')
+  }
 
   return user.reminders;
 }
@@ -80,6 +93,9 @@ export const checkResetToken = async (resetToken: string) => {
 
 export const getUserTasks = async (id: string) => {
   const tasks = await Task.find({ member: id })
+  if (!tasks) {
+    throw new Error('An error occured while fetching all user tasks')
+  }
   const populatedTasks = tasks.map(async task => await populateTask(task))
 
   return await Promise.all(populatedTasks);

@@ -131,7 +131,7 @@ export const checkResetToken = async (req: Request, res: Response) => {
     })
 
     // Return redirect URL containing user's reset token
-    const redirectURL = `http://localhost:3000/api/auth/change-password?resetToken=${user.resetToken}`
+    const redirectURL = `https://project-manager-q6c3.onrender.com/api/auth/change-password?resetToken=${user.resetToken}`
     
     return res.status(200).json({ redirectURL })
   } catch (error) {
