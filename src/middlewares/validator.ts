@@ -5,7 +5,7 @@ import { NextFunction, Request, Response } from "express";
 import * as User from '../services/user'
 import { deleteUpload } from "../config/storage";
 
-export const validateUserDetails: ValidationChain[] = [
+export const validateSignUp: ValidationChain[] = [
   check('username').trim()
     .isLength({ min: 5 }).withMessage('Username must be at least 5 characters')
     .isLength({ max: 30 }).withMessage('Username cannot be more than 30 characters'),
@@ -72,9 +72,30 @@ export const validatePasswordReset: ValidationChain[] = [
       }
 
       const user = await User.checkResetToken(req.query.resetToken)
+      if (!user) {
+        throw new Error('An error occured while fetching user by reset token')
+      }
+      
       const checkMatch = await bcrypt.compare(value, user.password)
       if (checkMatch) {
         throw new Error('New password cannot be set to same value as previous password')
+      }
+
+      return true;
+    }),
+]
+
+export const validateUpdateProfile: ValidationChain[] = [
+  check('username').trim()
+    .isLength({ min: 5 }).withMessage('Username must be at least 5 characters')
+    .isLength({ max: 30 }).withMessage('Username cannot be more than 30 characters'),
+
+  check('email').normalizeEmail()
+    .isEmail().withMessage('Please enter a valid email')
+    .custom(async (value: string) => {
+      const user = await User.getUserByEmail(value)
+      if (user) {
+        throw new Error('User with that email address already exists')
       }
 
       return true;

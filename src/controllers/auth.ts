@@ -18,10 +18,12 @@ export const register = async (req: Request, res: Response) => {
       profileImage = req.file.path
     }
 
-    // Resizing of images***
-
     // If all the checks are successful, create a new user
     const hashedPassword = await bcrypt.hash(password, 12)
+    if (!hashedPassword) {
+      return res.status(400).json({ message: "An error occured while fetching hashing password" })
+    }
+
     const user = await User.createUser({
       email,
       username,
@@ -44,6 +46,9 @@ export const login = async (req: Request, res: Response) => {
 
     // If all checks are successful, configure session data for newly logged in user
     const user = await User.getUserByEmail(email)
+    if (!user) {
+      return res.status(400).json({ message: "An error occured while fetching user by email address" })
+    }
     req.session.user = user
 
     /* When a user is redirected to the login page after clicking an invite,
@@ -175,7 +180,11 @@ export const changePassword = async (req: Request, res: Response) => {
     }
   
     // If reset token is valid, change password, reset the token value and save changes
-    const hashedPassword = await bcrypt.hash(password, 12)  
+    const hashedPassword = await bcrypt.hash(password, 12)
+    if (!hashedPassword) {
+      return res.status(400).json({ message: "An error occured while hashing password" })
+    }
+    
     user.password = hashedPassword
     user.resetToken = undefined
     await user.save()

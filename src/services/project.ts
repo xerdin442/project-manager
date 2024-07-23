@@ -19,8 +19,11 @@ export const getAll = async () => {
   return await Promise.all(populatedProjects);
 }
 
-export const getprojectById = (id: string) => {
-  return Project.findById(id)
+export const getprojectById = async (id: string) => {
+  const project = await Project.findById(id)
+  const populatedProject = await populateProject(project)
+
+  return populatedProject;
 }
 
 export const createProject = async (values: Record<string, any>) => {
@@ -43,17 +46,14 @@ export const deleteProject = (id: string) => {
 
 export const getMembersByRole = async (id: string, role: string) => {
   const project = await getprojectById(id)
-  const populatedProject = await populateProject(project)
-  const membersByRole = populatedProject.members.filter(member => { return role === member.role });
+  const membersByRole = project.members.filter(member => role === member.role);
 
   return membersByRole;
 }
 
 export const getAllMembers = async (id: string) => {
   const project = await getprojectById(id)
-  const populatedProject = await populateProject(project)
-
-  return populatedProject.members;
+  return project.members;
 }
 
 export const deleteMember = async (projectId: string, userId: string) => {
@@ -73,7 +73,7 @@ export const addAdmin = async (projectId: string, userId: string) => {
   return await getMembersByRole(projectId, 'admin');
 }
 
-export const sendReminder = async (memberId: string, senderId: string, projectId: string, message: string) => {
+export const sendReminder = async (memberId: string, senderId: string, projectId: string, message: string, res: Response) => {
   const member = await User.findByIdAndUpdate(memberId, 
     { $push: { 
       reminders: {
@@ -81,6 +81,10 @@ export const sendReminder = async (memberId: string, senderId: string, projectId
         sender: new mongoose.Types.ObjectId(senderId),
         message
     }}}, { new: true })
+
+  if (!member) {
+    return res.status(400).json({ message: "An error occured while sending reminder" })
+  }
 
   return member.save()
 }
