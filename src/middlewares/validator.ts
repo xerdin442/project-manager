@@ -73,6 +73,15 @@ export const validatePasswordReset: ValidationChain[] = [
 
       return true;
     }),
+
+  check('confirmPassword').trim()
+    .custom(async (value: string, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error('Passwords do not match!')
+      }
+
+      return true;
+    })
 ]
 
 export const validateUpdateProfile: ValidationChain[] = [
