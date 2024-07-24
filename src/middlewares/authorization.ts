@@ -35,7 +35,7 @@ export const isProjectAdmin = async (req: Request, res: Response, next: NextFunc
   const isAdmin = admins.some(admin => admin.user._id.toString() === req.session.user._id.toString())
   
   if (!isAdmin) {
-    return res.status(403).send('Not authorized to perform this operation')
+    return res.status(403).send('Not authorized. Only project admins can perform this operation')
   }
 
   next()
@@ -49,7 +49,7 @@ export const isProjectMember = async (req: Request, res: Response, next: NextFun
   const isMember = members.some(member => member.user._id.toString() === req.session.user._id.toString())
 
   if (!isMember) {
-    return res.status(403).send('Not authorized to perform this operation')
+    return res.status(403).send('Not authorized. Only project members can perform this operation')
   }
 
   next()
@@ -63,7 +63,7 @@ export const isProjectOwner = async (req: Request, res: Response, next: NextFunc
   const isOwner = admins.some(admin => admin.user._id.toString() === req.session.user._id.toString() && admin.owner === true)
 
   if (!isOwner) {
-    return res.status(403).send('Not authorized to perform this operation')
+    return res.status(403).send('Not authorized. Only the project owner can perform this operation')
   }
 
   next()

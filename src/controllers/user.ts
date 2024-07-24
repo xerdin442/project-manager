@@ -87,7 +87,7 @@ export const getProjectsByRole = async (req: Request, res: Response) => {
 
     const { role } = req.query
     if (!role) {
-      return res.status(403).send('Not allowed to view projects')
+      return res.status(403).json({ message: 'Invalid query parameter' })
     }
 
     const projectsByRole = await User.getProjectsByRole(userId, role as string)

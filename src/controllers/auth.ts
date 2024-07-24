@@ -85,7 +85,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     // Find user by email address and return an error if not found
     const user = await User.getUserByEmail(email)
     if (!user) {
-      return res.status(400).send('User with that email does not exist')
+      return res.status(400).json({ message: 'User with that email does not exist' })
     }
   
     // If user check is successful, set the token, expiration time and save changes
@@ -113,7 +113,7 @@ export const checkResetToken = async (req: Request, res: Response) => {
     // Check if reset token is valid
     const user = await User.checkResetToken(resetToken)
     if (!user) {
-      return res.status(400).send('Invalid reset token')
+      return res.status(400).json({ message: 'Invalid reset token' })
     }
 
     // Check if reset token has expired
@@ -133,7 +133,7 @@ export const checkResetToken = async (req: Request, res: Response) => {
     // Return redirect URL containing user's reset token
     const redirectURL = `https://project-manager-q6c3.onrender.com/api/auth/change-password?resetToken=${user.resetToken}`
     
-    return res.status(200).json({ redirectURL })
+    return res.status(200).json({ message: "Verification successful!", redirectURL })
   } catch (error) {
     // Log and send an error message if any server errors are encountered
     console.log(error)
@@ -176,7 +176,7 @@ export const changePassword = async (req: Request, res: Response) => {
     // Send error message if reset token is invalid
     const user = await User.checkResetToken(resetToken as string)
     if (!user) {
-      return res.status(400).send('Invalid reset token')
+      return res.status(400).json({ message: 'Invalid reset token' })
     }
   
     // Check if new passowrd matches previous password

@@ -150,7 +150,7 @@ export const getMembersByRole = async (req: Request, res: Response) => {
     
     const { role } = req.query
     if (!role) {
-      return res.sendStatus(403).send('Role is not provided')
+      return res.sendStatus(403).json({ message: 'Invalid query parameter' })
     }
 
     const membersByRole = await Project.getMembersByRole(projectId, role as string)
