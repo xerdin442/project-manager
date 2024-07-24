@@ -6,7 +6,7 @@ import { handleValidationErrors, validateContentLength, validateTaskDetails } fr
 
 export default (router: express.Router) => {
   router.post('/projects/:projectId/tasks/assign/:memberId', isLoggedIn, isProjectAdmin, validateTaskDetails, handleValidationErrors, Task.assignTask)
-  router.post('/projects/:projectId/tasks/:taskId/update', isLoggedIn, isProjectAdmin, validateTaskDetails, handleValidationErrors, Task.updateTask)
+  router.put('/projects/:projectId/tasks/:taskId/update', isLoggedIn, isProjectAdmin, validateTaskDetails, handleValidationErrors, Task.updateTask)
   router.delete('/projects/:projectId/tasks/:taskId/delete', isLoggedIn, isProjectAdmin, Task.deleteTask)
 
   // Projects
