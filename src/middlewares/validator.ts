@@ -131,7 +131,7 @@ export const validateProjectStatus: ValidationChain[] = [
 
       const isValid = status.some(status => status === editedValue)
       if (!isValid) {
-        throw new Error('Invalid value for status')
+        throw new Error('Invalid value for project status')
       }
 
       return true;
@@ -142,6 +142,11 @@ export const validateContentLength: ValidationChain[] = [
   check('message' || 'content').trim()
   .isLength({ min: 10 }).withMessage('Content must be at least 10 characters')
   .isLength({ max: 256 }).withMessage('Content cannot be more than 256 characters')
+]
+
+export const validateAddMember: ValidationChain[] = [
+  check('email').normalizeEmail()
+    .isEmail().withMessage('Please enter a valid email')
 ]
 
 export const handleValidationErrors = (req: Request, res: Response, next: NextFunction) => {

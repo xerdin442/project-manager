@@ -2,7 +2,7 @@ import express from 'express';
 
 import * as Project from '../controllers/project';
 import { isLoggedIn, isProjectAdmin, isProjectMember, isProjectOwner } from '../middlewares/authorization';
-import { handleValidationErrors, validateContentLength, validateProjectDetails, validateProjectStatus } from '../middlewares/validator';
+import { handleValidationErrors, validateAddMember, validateContentLength, validateProjectDetails, validateProjectStatus } from '../middlewares/validator';
 
 export default (router: express.Router) => {
   router.get('/projects', Project.getAll);
@@ -16,7 +16,7 @@ export default (router: express.Router) => {
   router.get('/projects/:projectId/members', isLoggedIn, isProjectMember, Project.getAllMembers)
   router.get('/projects/:projectId/members/role', isLoggedIn, isProjectMember, Project.getMembersByRole)
   router.patch('/projects/:projectId/new-admin/:memberId', isLoggedIn, isProjectAdmin, isProjectOwner, Project.addAdmin)
-  router.post('/projects/:projectId/members/add-member', isLoggedIn, isProjectAdmin, isProjectOwner, Project.addMember)
+  router.post('/projects/:projectId/members/add-member', isLoggedIn, isProjectAdmin, isProjectOwner, validateAddMember, handleValidationErrors, Project.addMember)
   router.delete('/projects/:projectId/members/delete/:memberId', isLoggedIn, isProjectAdmin, isProjectOwner, Project.deleteMember)
   
   // Reminders
