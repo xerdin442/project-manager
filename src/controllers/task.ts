@@ -85,7 +85,7 @@ export const submitTask = async (req: Request, res: Response) => {
     const message = `"${taskInfo}..."
       New task has been submitted, awaiting your review`
 
-    await sendReminder(receiver, sender, project, message, res)
+    await sendReminder(receiver, sender, project, message)
 
     return res.status(200).json({ message: "Task submitted successfully, awaiting review...", task: updatedTask }).end()
   } catch (error) {
@@ -117,7 +117,7 @@ export const approveTask = async (req: Request, res: Response) => {
     const message = `"${taskInfo}..."
       Task has been approved. Start working on the next!`
 
-    await sendReminder(receiver, sender, project, message, res)
+    await sendReminder(receiver, sender, project, message)
 
     return res.status(200).json({ message: "Task has been approved and marked as 'Completed'", task: updatedTask }).end()
   } catch (error) {
@@ -149,7 +149,7 @@ export const rejectTask = async (req: Request, res: Response) => {
     const message = `"${taskInfo}..."
       Task has been rejected. Check task comments to see the reasons!`
     
-    await sendReminder(receiver, sender, project, message, res)
+    await sendReminder(receiver, sender, project, message)
 
     return res.status(200).json({ message: "Task has been rejected. Leave a comment on the reason for rejection", task: updatedTask }).end()
   } catch (error) {
