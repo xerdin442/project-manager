@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { Request, Response } from 'express';
 
 import { Project, IProject } from '../models/project';
 import { getProjectTasks } from './task';
@@ -96,7 +95,7 @@ export const addAdmin = async (projectId: string, userId: string) => {
   return await getMembersByRole(projectId, 'admin');
 }
 
-export const sendReminder = async (memberId: string, senderId: string, projectId: string, message: string, res: Response) => {
+export const sendReminder = async (memberId: string, senderId: string, projectId: string, message: string) => {
   const member = await User.findByIdAndUpdate(memberId, 
     { $push: { 
       reminders: {
@@ -106,39 +105,34 @@ export const sendReminder = async (memberId: string, senderId: string, projectId
     }}}, { new: true })
 
   if (!member) {
-    return res.status(400).json({ message: "An error occured while sending reminder" })
+    throw new Error("An error occured while sending reminder")
   }
 
   return member.save()
 }
 
-export const getInviteLink = async (projectId: string) => {
-  const project = await getprojectById(projectId)
-  if (!project) {
-    throw new Error('Project not found')
+export const addMember = async (email: string, projectId: string) => {
+  const newMember = await User.findOne({ email })
+  if(!newMember) {
+    throw new Error('No user found with that email')
   }
 
-  const inviteLink = `https://project-manager-q6c3.onrender.com/api/projects/${project.id}/invite/${project.inviteToken}`
-  return inviteLink;
-}
-
-export const addMember = async (inviteToken: string, req: Request, res: Response) => {
-  const project = await Project.findOne({ inviteToken })
+  const project = await getprojectById(projectId)
   if (project) {
-    const userId = req.session.user.id
-
-    // Check if the user is already a member
-    const isMember = project.members.some(member => member.user.equals(userId));
-    if (!isMember) {
-      project.members.push({ user: userId, role: 'member', owner: false });
-      await project.save();
-
-      return res.status(200).json({ message: `You have joined "${project.name}" as a member!` }).end()
+    const isMember = project.members.some(member => member.user._id.toString() === newMember._id.toString())
+    if (isMember) {
+      throw new Error(`${newMember.username} is already a member of this project`)
     } else {
-      return res.status(400).send('You are already a member of this project')
+      project.members.push({
+        user: new mongoose.Types.ObjectId(newMember._id.toString()),
+        role: "member",
+        owner: false
+      })
+
+      await project.save()
     }
   } else {
-    return res.status(400).send('Project not found')
+    throw new Error('Project not found')
   }
 }
 

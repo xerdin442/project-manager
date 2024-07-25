@@ -2,7 +2,6 @@ import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
 
 import * as User from '../services/user'
-import { addMember } from '../services/project'
 import { sendEmail } from '../util/mail'
 
 export const register = async (req: Request, res: Response) => {
@@ -50,11 +49,6 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "An error occured while fetching user by email address" })
     }
     req.session.user = user
-
-    /* When a user is redirected to the login page after clicking an invite,
-    check for query parameters and add user as project member */
-    const { inviteToken } = req.query
-    if (inviteToken) { return addMember(inviteToken as string, req, res) }
 
     return res.status(200).json({ message: 'Login successful' }).end() // Send a success message if login is complete
   } catch (error) {

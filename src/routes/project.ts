@@ -16,15 +16,12 @@ export default (router: express.Router) => {
   router.get('/projects/:projectId/members', isLoggedIn, isProjectMember, Project.getAllMembers)
   router.get('/projects/:projectId/members/role', isLoggedIn, isProjectMember, Project.getMembersByRole)
   router.patch('/projects/:projectId/new-admin/:memberId', isLoggedIn, isProjectAdmin, isProjectOwner, Project.addAdmin)
+  router.post('/projects/:projectId/members/add-member', isLoggedIn, isProjectAdmin, isProjectOwner, Project.addMember)
   router.delete('/projects/:projectId/members/delete/:memberId', isLoggedIn, isProjectAdmin, isProjectOwner, Project.deleteMember)
   
   // Reminders
   router.post('/projects/:projectId/members/send-reminder/:memberId', isLoggedIn, isProjectAdmin, validateContentLength, handleValidationErrors, Project.sendReminder)
   
-  // Invites
-  router.get('/projects/:projectId/get-invite', isLoggedIn, isProjectAdmin, Project.getInviteLink)
-  router.get('/projects/:projectId/invite/:inviteToken', Project.acceptInvite)
-
   // Progress
   router.get('/projects/:projectId/progress', Project.getProgress)
 };

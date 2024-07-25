@@ -39,7 +39,6 @@ export const projectDetails = async (req: Request, res: Response) => {
 export const createProject = async (req: Request, res: Response) => {
   try {
     const { name, client, description, deadline } = req.body
-    const token = Math.ceil(Math.random() * 10 ** 6)
     const userId = req.session.user._id
 
     const project = await Project.createProject({
@@ -52,7 +51,6 @@ export const createProject = async (req: Request, res: Response) => {
       client,
       description,
       deadline,
-      inviteToken: token
     })
 
     if (!project) {
@@ -212,7 +210,7 @@ export const sendReminder = async (req: Request, res: Response) => {
 
     const { message } = req.body
     const senderId = req.session.user._id.toString()
-    await Project.sendReminder(memberId, senderId, projectId, message, res)
+    await Project.sendReminder(memberId, senderId, projectId, message)
 
     return res.status(200).json({ message: 'Your reminder has been sent!' }).end()
   } catch (error) {
@@ -221,29 +219,21 @@ export const sendReminder = async (req: Request, res: Response) => {
   }
 }
 
-export const getInviteLink = async (req: Request, res: Response) => {
+export const addMember = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
     if (!Types.ObjectId.isValid(projectId)) {
       return res.status(400).json({ message: "Invalid project ID" })
     }
 
-    const inviteLink = await Project.getInviteLink(projectId)
-    if (!inviteLink) {
-      return res.status(400).json({ message: "An error occured while getting project invite link" })
-    }
-  
-    return res.status(200).json(inviteLink).end()  
+    const { email } = req.body
+    await Project.addMember(email, projectId)
+
+    return res.status(200).json({ message: "New member successfully added to project" })
   } catch (error) {
    console.log(error)
    return res.sendStatus(500) 
   }
-}
-
-export const acceptInvite = async (req: Request, res: Response) => {
-  const { inviteToken } = req.params
-
-  return res.redirect(`/api/auth/login?inviteToken=${inviteToken}`)
 }
 
 export const getProgress = async (req: Request, res: Response) => {
