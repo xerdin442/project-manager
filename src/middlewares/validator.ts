@@ -153,7 +153,7 @@ export const handleValidationErrors = (req: Request, res: Response, next: NextFu
   // Extract all validation errors, if any, and return the error message
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    const message = errors.array()[0].msg
+    const error = errors.array()[0].msg
 
     // Check for any uploaded image and delete from cloud storage
     if (req.file && req.file.path) {
@@ -163,7 +163,7 @@ export const handleValidationErrors = (req: Request, res: Response, next: NextFu
       deleteUpload(publicId) // Delete the uploaded image from Cloudinary
     }
 
-    return res.status(422).json({ message })
+    return res.status(422).json({ error })
   }
 
   next() // Proceed to next middleware if there are no errors

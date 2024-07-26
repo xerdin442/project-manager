@@ -20,7 +20,7 @@ export const register = async (req: Request, res: Response) => {
     // If all the checks are successful, create a new user
     const hashedPassword = await bcrypt.hash(password, 12)
     if (!hashedPassword) {
-      return res.status(400).json({ message: "An error occured while fetching hashing password" })
+      return res.status(400).json({ error: "An error occured while hashing password" })
     }
 
     const user = await User.createUser({
@@ -30,8 +30,10 @@ export const register = async (req: Request, res: Response) => {
       profileImage
     })
 
+    req.session.user = user // Log user in and configure session data
+
     // Send success message if registration is complete
-    return res.status(200).json({ message: 'Registration successful, you can now login.', user: user }).end()
+    return res.status(200).json({ message: 'Registration successful!', user: user }).end()
   } catch (error) {
     // Log and send an error message if any server errors are encountered
     console.log(error)
@@ -46,7 +48,7 @@ export const login = async (req: Request, res: Response) => {
     // If all checks are successful, configure session data for newly logged in user
     const user = await User.getUserByEmail(email)
     if (!user) {
-      return res.status(400).json({ message: "An error occured while fetching user by email address" })
+      return res.status(400).json({ error: "An error occured while fetching user by email address" })
     }
     req.session.user = user
 
@@ -79,7 +81,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     // Find user by email address and return an error if not found
     const user = await User.getUserByEmail(email)
     if (!user) {
-      return res.status(400).json({ message: 'User with that email does not exist' })
+      return res.status(400).json({ error: 'User with that email does not exist' })
     }
   
     // If user check is successful, set the token, expiration time and save changes
@@ -107,12 +109,12 @@ export const checkResetToken = async (req: Request, res: Response) => {
     // Check if reset token is valid
     const user = await User.checkResetToken(resetToken)
     if (!user) {
-      return res.status(400).json({ message: 'Invalid reset token' })
+      return res.status(400).json({ error: 'Invalid reset token' })
     }
 
     // Check if reset token has expired
     if (user.resetTokenExpiration < Date.now()) {
-      return res.status(400).json({ message: 'The reset token has expired' })
+      return res.status(400).json({ error: 'The reset token has expired' })
     }
 
     // Reset token expiration time if the token is valid and save changes
@@ -140,7 +142,7 @@ export const resendToken = async (req: Request, res: Response) => {
     // Check if user exists with the email stored in session
     const user = await User.getUserByEmail(req.session.email)
     if (!user) {
-      return res.status(400).json({ message: 'User not found' })
+      return res.status(400).json({ error: 'User not found' })
     }
 
     // Generate new reset token, reset the expiration time and save changes
@@ -170,19 +172,19 @@ export const changePassword = async (req: Request, res: Response) => {
     // Send error message if reset token is invalid
     const user = await User.checkResetToken(resetToken as string)
     if (!user) {
-      return res.status(400).json({ message: 'Invalid reset token' })
+      return res.status(400).json({ error: 'Invalid reset token' })
     }
   
     // Check if new passowrd matches previous password
     const checkMatch = await bcrypt.compare(password, user.password)
     if (checkMatch) {
-      return res.status(400).json({ message: 'New password cannot be set to same value as previous password' })
+      return res.status(400).json({ error: 'New password cannot be set to same value as previous password' })
     }
 
     // If reset token is valid, change password, reset the token value and save changes
     const hashedPassword = await bcrypt.hash(password, 12)
     if (!hashedPassword) {
-      return res.status(400).json({ message: "An error occured while hashing password" })
+      return res.status(400).json({ error: "An error occured while hashing password" })
     }
     
     user.password = hashedPassword

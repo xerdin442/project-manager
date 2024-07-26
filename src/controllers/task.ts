@@ -9,14 +9,14 @@ export const assignTask = async (req: Request, res: Response) => {
   try {
     const { projectId, memberId } = req.params
     if (!Types.ObjectId.isValid(projectId) || !Types.ObjectId.isValid(memberId)) {
-      return res.status(400).json({ message: "Invalid project ID or member ID" })
+      return res.status(400).json({ error: "Invalid project ID or member ID" })
     }
 
     const { description, deadline, urgent } = req.body
     
     const member = await getUserById(memberId)
     if (!member) {
-      return res.status(400).json({ message: "An error occured while fetching member by ID" })
+      return res.status(400).json({ error: "An error occured while fetching member by ID" })
     }
 
     const adminId = req.session.user._id
@@ -32,7 +32,7 @@ export const assignTask = async (req: Request, res: Response) => {
     })
 
     if (!newTask) {
-      return res.status(400).json({ message: "An error occured while creating new task" })
+      return res.status(400).json({ error: "An error occured while creating new task" })
     }
 
     return res.status(200).json({ message: `Task has been assigned to ${member.username}`, task: newTask }).end()
@@ -46,13 +46,13 @@ export const updateTask = async (req: Request, res: Response) => {
   try {
     const { taskId } = req.params
     if (!Types.ObjectId.isValid(taskId)) {
-      return res.status(400).json({ message: "Invalid task ID" })
+      return res.status(400).json({ error: "Invalid task ID" })
     }
 
     const { description, urgent, deadline } = req.body
     const updatedTask = await Task.updateTask(taskId, { description, urgent, deadline })
     if (!updatedTask) {
-      return res.status(400).json({ message: "An error occured while updating task details" })
+      return res.status(400).json({ error: "An error occured while updating task details" })
     }
 
     return res.status(200).json({ message: "Task details updated successfully!", task: updatedTask }).end()
@@ -66,16 +66,16 @@ export const submitTask = async (req: Request, res: Response) => {
   try {
     const { taskId } = req.params
     if (!Types.ObjectId.isValid(taskId)) {
-      return res.status(400).json({ message: "Invalid task ID" })
+      return res.status(400).json({ error: "Invalid task ID" })
     }
 
     const updatedTask = await Task.updateTask(taskId, { status: 'Awaiting Review' })
     if (!updatedTask) {
-      return res.status(400).json({ message: "An error occured while updating task status" })
+      return res.status(400).json({ error: "An error occured while updating task status" })
     }
 
     if (!Types.ObjectId.isValid(updatedTask.assignedBy._id) || !Types.ObjectId.isValid(updatedTask.project._id)) {
-      return res.status(400).json({ message: "Error while sending reminder, invalid assignee ID or project ID" })
+      return res.status(400).json({ error: "Error while sending reminder, invalid assignee ID or project ID" })
     }
 
     const receiver = updatedTask.assignedBy._id.toString()
@@ -98,16 +98,16 @@ export const approveTask = async (req: Request, res: Response) => {
   try {
     const { taskId } = req.params
     if (!Types.ObjectId.isValid(taskId)) {
-      return res.status(400).json({ message: "Invalid task ID" })
+      return res.status(400).json({ error: "Invalid task ID" })
     }
 
     const updatedTask = await Task.updateTask(taskId, { status: 'Completed' })
     if (!updatedTask) {
-      return res.status(400).json({ message: "An error occured while updating task status" })
+      return res.status(400).json({ error: "An error occured while updating task status" })
     }
 
     if (!Types.ObjectId.isValid(updatedTask.member._id) || !Types.ObjectId.isValid(updatedTask.project._id)) {
-      return res.status(400).json({ message: "Error occured while sending reminder, invalid member ID or project ID" })
+      return res.status(400).json({ error: "Error occured while sending reminder, invalid member ID or project ID" })
     }
 
     const receiver = updatedTask.member._id.toString()
@@ -130,16 +130,16 @@ export const rejectTask = async (req: Request, res: Response) => {
   try {
     const { taskId } = req.params
     if (!Types.ObjectId.isValid(taskId)) {
-      return res.status(400).json({ message: "Invalid task ID" })
+      return res.status(400).json({ error: "Invalid task ID" })
     }
 
     const updatedTask = await Task.updateTask(taskId, { status: 'To-do' })
     if (!updatedTask) {
-      return res.status(400).json({ message: "An error occured while updating task status" })
+      return res.status(400).json({ error: "An error occured while updating task status" })
     }
 
     if (!Types.ObjectId.isValid(updatedTask.member._id) || !Types.ObjectId.isValid(updatedTask.project._id)) {
-      return res.status(400).json({ message: "Error occured while sending reminder, invalid member ID or project ID" })
+      return res.status(400).json({ error: "Error occured while sending reminder, invalid member ID or project ID" })
     }
 
     const receiver = updatedTask.member._id.toString()
@@ -162,7 +162,7 @@ export const deleteTask = async (req: Request, res: Response) => {
   try {
     const { taskId } = req.params
     if (!Types.ObjectId.isValid(taskId)) {
-      return res.status(400).json({ message: "Invalid task ID" })
+      return res.status(400).json({ error: "Invalid task ID" })
     }
 
     await Task.deleteTask(taskId)
@@ -178,12 +178,12 @@ export const getProjectTasks = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params
     if (!Types.ObjectId.isValid(projectId)) {
-      return res.status(400).json({ message: "Invalid project ID" })
+      return res.status(400).json({ error: "Invalid project ID" })
     }
 
     const tasks = await Task.getProjectTasks(projectId)
     if (!tasks) {
-      return res.status(400).json({ message: "An error occured while fetching project tasks" })
+      return res.status(400).json({ error: "An error occured while fetching project tasks" })
     }
 
     return res.status(200).json(tasks).end()
@@ -197,12 +197,12 @@ export const getTasksPerMember = async (req: Request, res: Response) => {
   try {
     const { projectId, memberId } = req.params
     if (!Types.ObjectId.isValid(projectId) || !Types.ObjectId.isValid(memberId)) {
-      return res.status(400).json({ message: "Invalid project ID or member ID" })
+      return res.status(400).json({ error: "Invalid project ID or member ID" })
     }
 
     const tasksPerMember = await Task.getTasksPerMember(memberId, projectId)
     if (!tasksPerMember) {
-      return res.status(400).json({ message: "An error occured while fetching tasks per member" })
+      return res.status(400).json({ error: "An error occured while fetching tasks per member" })
     }
 
     return res.status(200).json(tasksPerMember).end()
@@ -218,7 +218,7 @@ export const getSubmittedTasks = async (req: Request, res: Response) => {
 
     const submittedTasks = await Task.getSubmittedTasks(projectId)
     if (!submittedTasks) {
-      return res.status(400).json({ message: "An error occured while fetching all submitted tasks" })
+      return res.status(400).json({ error: "An error occured while fetching all submitted tasks" })
     }
 
     return res.status(200).json(submittedTasks).end()
@@ -232,7 +232,7 @@ export const createComment = async (req: Request, res: Response) => {
   try {
     const { taskId } = req.params
     if (!Types.ObjectId.isValid(taskId)) {
-      return res.status(400).json({ message: "Invalid task ID" })
+      return res.status(400).json({ error: "Invalid task ID" })
     }
 
     const { content } = req.body
@@ -242,7 +242,7 @@ export const createComment = async (req: Request, res: Response) => {
     })
 
     if (!newComment) {
-      return res.status(400).json({ message: "An error occured while creating a new comment" })
+      return res.status(400).json({ error: "An error occured while creating a new comment" })
     }
 
     return res.status(200).json(newComment).end()
@@ -256,7 +256,7 @@ export const replyComment = async (req: Request, res: Response) => {
   try {
     const { commentId } = req.params
     if (!Types.ObjectId.isValid(commentId)) {
-      return res.status(400).json({ message: "Invalid task ID" })
+      return res.status(400).json({ error: "Invalid task ID" })
     }
 
     const { content } = req.body
@@ -266,7 +266,7 @@ export const replyComment = async (req: Request, res: Response) => {
     })
 
     if (!reply) {
-      return res.status(400).json({ message: "An error occured while replying comment" })
+      return res.status(400).json({ error: "An error occured while replying comment" })
     }
 
     return res.status(200).json(reply).end()
@@ -280,12 +280,12 @@ export const getCommentsPerTask = async (req: Request, res: Response) => {
   try {
     const { taskId } = req.params
     if (!Types.ObjectId.isValid(taskId)) {
-      return res.status(400).json({ message: "Invalid task ID" })
+      return res.status(400).json({ error: "Invalid task ID" })
     }
     
     const comments = await Task.getCommentsPerTask(taskId)
     if (!comments) {
-      return res.status(400).json({ message: "An error occured while fetching comments per task" })
+      return res.status(400).json({ error: "An error occured while fetching comments per task" })
     }
 
     return res.status(200).json(comments).end()
