@@ -18,7 +18,7 @@ dotenv.config(); // Load environment variables
 // Initialize and configure middlewares
 app.use(cors({ credentials: true }))
 app.use(compression())
-app.use(bodyParser.json())
+app.use(bodyParser.json({ limit: "50mb" }))
 app.use(cookieParser())
 
 // Configure session middleware
