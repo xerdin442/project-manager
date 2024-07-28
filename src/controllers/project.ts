@@ -208,9 +208,9 @@ export const sendReminder = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Invalid project ID or member ID" })
     }
 
-    const { error } = req.body
+    const { message } = req.body
     const senderId = req.session.user._id.toString()
-    await Project.sendReminder(memberId, senderId, projectId, error)
+    await Project.sendReminder(memberId, senderId, projectId, message)
 
     return res.status(200).json({ message: 'Your reminder has been sent!' }).end()
   } catch (error) {
