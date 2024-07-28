@@ -209,10 +209,6 @@ export const sendReminder = async (req: Request, res: Response) => {
     }
 
     const { message } = req.body
-    if (!message) {
-      return res.status(400).json({ error: "Message is required" });
-    }
-    
     const senderId = req.session.user._id.toString()
     await Project.sendReminder(memberId, senderId, projectId, message)
 
@@ -248,7 +244,7 @@ export const getProgress = async (req: Request, res: Response) => {
     }
 
     const progress = await Project.getProgress(projectId)
-    if (!progress) {
+    if (!progress && progress !== 0) {
       return res.status(400).json({ error: "An error occured while fetching the progress of the project" })
     }
 

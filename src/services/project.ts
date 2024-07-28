@@ -96,19 +96,31 @@ export const addAdmin = async (projectId: string, userId: string) => {
 }
 
 export const sendReminder = async (memberId: string, senderId: string, projectId: string, message: string) => {
-  const member = await User.findByIdAndUpdate(memberId, 
-    { $push: { 
-      reminders: {
-        project: new mongoose.Types.ObjectId(projectId),
-        sender: new mongoose.Types.ObjectId(senderId),
-        message
-    }}}, { new: true })
+  const user = await User.findById(memberId)
+  const project = await getprojectById(projectId)
 
-  if (!member) {
-    throw new Error("An error occured while sending reminder")
+  if (project) {
+    const isMember = project.members.some(member => member.user._id.toString() === user._id.toString())
+    if (isMember) {
+      const member = await User.findByIdAndUpdate(memberId, 
+        { $push: { 
+          reminders: {
+            project: new mongoose.Types.ObjectId(projectId),
+            sender: new mongoose.Types.ObjectId(senderId),
+            message
+        }}}, { new: true })
+    
+      if (!member) {
+        throw new Error("An error occured while sending reminder")
+      }
+    
+      return member.save()
+    } else {
+      throw new Error('Incorrect member details provided')
+    }
+  } else {
+    throw new Error('Project not found')
   }
-
-  return member.save()
 }
 
 export const addMember = async (email: string, projectId: string) => {
