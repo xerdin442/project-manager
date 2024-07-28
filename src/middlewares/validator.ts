@@ -138,12 +138,6 @@ export const validateProjectStatus: ValidationChain[] = [
     })
 ]
 
-export const validateContentLength: ValidationChain[] = [
-  check('message' || 'content').trim()
-  .isLength({ min: 10 }).withMessage('Content must be at least 10 characters')
-  .isLength({ max: 256 }).withMessage('Content cannot be more than 256 characters')
-]
-
 export const validateAddMember: ValidationChain[] = [
   check('email').normalizeEmail()
     .isEmail().withMessage('Please enter a valid email')

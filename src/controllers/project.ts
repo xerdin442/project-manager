@@ -244,9 +244,6 @@ export const getProgress = async (req: Request, res: Response) => {
     }
 
     const progress = await Project.getProgress(projectId)
-    if (!progress && progress !== 0) {
-      return res.status(400).json({ error: "An error occured while fetching the progress of the project" })
-    }
 
     return res.status(200).json({ progress: `${progress}%` }).end()
   } catch (error) {

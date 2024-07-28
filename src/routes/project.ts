@@ -2,7 +2,7 @@ import express from 'express';
 
 import * as Project from '../controllers/project';
 import { isLoggedIn, isProjectAdmin, isProjectMember, isProjectOwner } from '../middlewares/authorization';
-import { handleValidationErrors, validateAddMember, validateContentLength, validateProjectDetails, validateProjectStatus } from '../middlewares/validator';
+import { handleValidationErrors, validateAddMember, validateProjectDetails, validateProjectStatus } from '../middlewares/validator';
 
 export default (router: express.Router) => {
   router.get('/projects', Project.getAll);
@@ -20,7 +20,7 @@ export default (router: express.Router) => {
   router.delete('/projects/:projectId/members/delete/:memberId', isLoggedIn, isProjectAdmin, isProjectOwner, Project.deleteMember)
   
   // Reminders
-  router.post('/projects/:projectId/members/send-reminder/:memberId', isLoggedIn, isProjectAdmin, validateContentLength, handleValidationErrors, Project.sendReminder)
+  router.post('/projects/:projectId/members/send-reminder/:memberId', isLoggedIn, isProjectAdmin, Project.sendReminder)
   
   // Progress
   router.get('/projects/:projectId/progress', Project.getProgress)

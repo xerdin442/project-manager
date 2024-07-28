@@ -153,9 +153,14 @@ export const getProgress = async (projectId: string) => {
   if (!tasks) {
     throw new Error('An error occured while fetching tasks')
   }
-
-  const completedTasks = tasks.filter(task => task.status === 'Completed')
-  const progress = (completedTasks.length / tasks.length) * 100
-
-  return Math.ceil(progress);
+  
+  let progress: number = 0;
+  if (tasks.length > 0) {
+    const completedTasks = tasks.filter(task => task.status === 'Completed')
+    progress = (completedTasks.length / tasks.length) * 100
+  
+    return Math.ceil(progress);
+  }
+  
+  return progress;
 }
