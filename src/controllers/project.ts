@@ -209,6 +209,10 @@ export const sendReminder = async (req: Request, res: Response) => {
     }
 
     const { message } = req.body
+    if (!message) {
+      return res.status(400).json({ error: "Message is required" });
+    }
+    
     const senderId = req.session.user._id.toString()
     await Project.sendReminder(memberId, senderId, projectId, message)
 
