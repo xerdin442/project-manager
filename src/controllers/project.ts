@@ -39,7 +39,7 @@ export const projectDetails = async (req: Request, res: Response) => {
 export const createProject = async (req: Request, res: Response) => {
   try {
     const { name, client, description, deadline } = req.body
-    const userId = req.session.user._id
+    const userId = req.session.user.id
 
     const project = await Project.createProject({
       name,
@@ -209,7 +209,7 @@ export const sendReminder = async (req: Request, res: Response) => {
     }
 
     const { message } = req.body
-    const senderId = req.session.user._id
+    const senderId = req.session.user.id
     await Project.sendReminder(memberId, senderId, projectId, message)
 
     return res.status(200).json({ message: 'Your reminder has been sent!' }).end()

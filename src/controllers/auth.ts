@@ -31,14 +31,15 @@ export const register = async (req: Request, res: Response) => {
       profileImage
     })
     
+    // Create and assign a JWT to expire in 3hrs
     const token = jwt.sign(
-      { id: user._id.toString(), email: user.email },
+      { id: user._id.toString() },
       process.env.JWT_SECRET,
       { expiresIn: '3h' }
     )
 
-    // Add authorization token to header and send a success message if registration is complete
-    return res.header('Authorization', `BEARER: ${token}`)
+    // Add the authorization token to header and send a success message if registration is complete
+    return res.setHeader('Authorization', `BEARER ${token}`)
       .status(200)
       .json({ message: 'Registration successful!', user: user }).end()
   } catch (error) {
@@ -58,14 +59,15 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while fetching user by email address" })
     }
 
+    // Create and assign a JWT to expire in 3hrs
     const token = jwt.sign(
-      { id: user._id.toString(), email: user.email },
+      { id: user._id.toString() },
       process.env.JWT_SECRET,
       { expiresIn: '3h' }
     )
 
-    // Add authorization token to header and send a success message if login is complete
-    return res.header('Authorization', `BEARER: ${token}`)
+    // Add the authorization token to header and send a success message if login is complete
+    return res.setHeader('Authorization', `BEARER ${token}`)
       .status(200)
       .json({ message: 'Login successful' }).end()
   } catch (error) {
