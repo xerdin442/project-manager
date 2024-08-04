@@ -79,7 +79,7 @@ export const submitTask = async (req: Request, res: Response) => {
     }
 
     const receiver = updatedTask.assignedBy._id.toString()
-    const sender = req.session.user._id.toString()
+    const sender = req.session.user._id
     const project = updatedTask.project._id.toString()
     const taskInfo = updatedTask.description.slice(0, 35)
     const message = `"${taskInfo}..."
@@ -111,7 +111,7 @@ export const approveTask = async (req: Request, res: Response) => {
     }
 
     const receiver = updatedTask.member._id.toString()
-    const sender = req.session.user._id.toString()
+    const sender = req.session.user._id
     const project = updatedTask.project._id.toString()
     const taskInfo = updatedTask.description.slice(0, 35)
     const message = `"${taskInfo}..."
@@ -143,7 +143,7 @@ export const rejectTask = async (req: Request, res: Response) => {
     }
 
     const receiver = updatedTask.member._id.toString()
-    const sender = req.session.user._id.toString()
+    const sender = req.session.user._id
     const project = updatedTask.project._id.toString()
     const taskInfo = updatedTask.description.slice(0, 35)
     const message = `"${taskInfo}..."

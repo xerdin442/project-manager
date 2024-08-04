@@ -209,7 +209,7 @@ export const sendReminder = async (req: Request, res: Response) => {
     }
 
     const { message } = req.body
-    const senderId = req.session.user._id.toString()
+    const senderId = req.session.user._id
     await Project.sendReminder(memberId, senderId, projectId, message)
 
     return res.status(200).json({ message: 'Your reminder has been sent!' }).end()

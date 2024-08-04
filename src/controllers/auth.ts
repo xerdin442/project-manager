@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 
 import * as User from '../services/user'
 import { sendEmail } from '../util/mail'
@@ -29,11 +30,17 @@ export const register = async (req: Request, res: Response) => {
       password: hashedPassword,
       profileImage
     })
+    
+    const token = jwt.sign(
+      { id: user._id.toString(), email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '3h' }
+    )
 
-    req.session.user = user // Log user in and configure session data
-
-    // Send success message if registration is complete
-    return res.status(200).json({ message: 'Registration successful!', user: user }).end()
+    // Add authorization token to header and send a success message if registration is complete
+    return res.header('Authorization', `BEARER: ${token}`)
+      .status(200)
+      .json({ message: 'Registration successful!', user: user }).end()
   } catch (error) {
     // Log and send an error message if any server errors are encountered
     console.log(error)
@@ -50,9 +57,17 @@ export const login = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(400).json({ error: "An error occured while fetching user by email address" })
     }
-    req.session.user = user
 
-    return res.status(200).json({ message: 'Login successful' }).end() // Send a success message if login is complete
+    const token = jwt.sign(
+      { id: user._id.toString(), email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '3h' }
+    )
+
+    // Add authorization token to header and send a success message if login is complete
+    return res.header('Authorization', `BEARER: ${token}`)
+      .status(200)
+      .json({ message: 'Login successful' }).end()
   } catch (error) {
     // Log and send an error message if any server errors are encountered
     console.log(error)
