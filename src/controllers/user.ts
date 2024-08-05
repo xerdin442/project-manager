@@ -10,7 +10,7 @@ export const getAll = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while fetching all users" })
     }
 
-    return res.status(200).json(users).end()
+    return res.status(200).json({ users }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -29,7 +29,7 @@ export const getProfile = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while fetching user details" })
     }
 
-    return res.status(200).json(user).end()
+    return res.status(200).json({ user }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -55,7 +55,7 @@ export const updateProfile = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while creating new user" })
     }
   
-    return res.status(200).json(user).end()
+    return res.status(200).json({ user }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500) 
@@ -95,7 +95,11 @@ export const getProjectsByRole = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while fetching projects by role" })
     }
 
-    return res.status(200).json(projectsByRole).end()
+    if (role === 'admin') {
+      return res.status(200).json({ projectsAsAdmin: projectsByRole }).end()
+    } else if (role === 'member') {
+      return res.status(200).json({ projectsAsMember: projectsByRole }).end()
+    }
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -114,7 +118,7 @@ export const getUserProjects = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while fetching user projects" })
     }
 
-    return res.status(200).json(userProjects).end()
+    return res.status(200).json({ projects: userProjects }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -133,7 +137,7 @@ export const getReminders = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while fetching reminders" })
     }
 
-    return res.status(200).json(reminders).end()
+    return res.status(200).json({ reminders }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -168,7 +172,7 @@ export const getUserTasks = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while fetching user tasks" })
     }
 
-    res.status(200).json(tasks).end()
+    res.status(200).json({ tasks }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -187,7 +191,7 @@ export const getTasksPerProject = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while fetching tasks per project" })
     }
 
-    res.status(200).json(tasksPerProject).end()
+    res.status(200).json({ tasks: tasksPerProject }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)

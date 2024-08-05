@@ -15,30 +15,24 @@ export const isLoggedIn = (req: Request, res: Response, next: NextFunction) => {
     return res.status(400).json({ error: "Access denied. Invalid token!" })
   }
 
-  // Verify and extract payload from authorization token
-  const payload = jwt.verify(token, process.env.JWT_SECRET)
-  if (!payload) {
-    return res.status(400).json({ error: "Access denied. An error occured while verifying token!" })
-  }
-
-  req.session.user = payload as JwtPayload // Initialize a new session using the extracted payload data
-  next()
-}
-
-export const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
-  const { userId } = req.params
-
-  // Check if there is a logged in user
-  if (req.session.user) {
-    // Check if the logged in user is the same as the user requesting to perform the operation
-    if (req.session.user.id !== userId) {
-      return res.status(401).json({ error: "Not authenticated to perform this operation" })
+  try {
+    // Verify and extract payload from authorization token
+    const payload = jwt.verify(token, process.env.JWT_SECRET)
+    if (!payload) {
+      return res.status(400).json({ error: "Access denied. An error occured while verifying token!" })
     }
-  } else {
-    return res.status(401).json({ error: "You are not logged in" })
-  }
 
-  next()
+    req.session.user = payload as JwtPayload // Initialize a new session using the extracted payload data
+    next()
+  } catch (error) {
+    // Check if the error was caused by token expiration
+    if (error instanceof jwt.TokenExpiredError) {
+      return res.status(401).json({ error: "Access denied. Token has expired!" });
+    } else {
+      console.log(error)
+      return res.sendStatus(500)
+    }
+  }
 }
 
 export const isProjectAdmin = async (req: Request, res: Response, next: NextFunction) => {
@@ -47,7 +41,7 @@ export const isProjectAdmin = async (req: Request, res: Response, next: NextFunc
   // Get all the project admins and check if the logged in user is an admin
   const admins = await getMembersByRole(projectId, 'admin')
   const isAdmin = admins.some(admin => admin.user._id.toString() === req.session.user.id)
-  
+
   if (!isAdmin) {
     return res.status(403).json({ error: 'Not authorized. Only project admins can perform this operation' })
   }

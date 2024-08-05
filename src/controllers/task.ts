@@ -186,7 +186,7 @@ export const getProjectTasks = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while fetching project tasks" })
     }
 
-    return res.status(200).json(tasks).end()
+    return res.status(200).json({ tasks }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -205,7 +205,7 @@ export const getTasksPerMember = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while fetching tasks per member" })
     }
 
-    return res.status(200).json(tasksPerMember).end()
+    return res.status(200).json({ tasks: tasksPerMember }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -221,7 +221,7 @@ export const getSubmittedTasks = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while fetching all submitted tasks" })
     }
 
-    return res.status(200).json(submittedTasks).end()
+    return res.status(200).json({ tasks: submittedTasks }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -245,7 +245,7 @@ export const createComment = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while creating a new comment" })
     }
 
-    return res.status(200).json(newComment).end()
+    return res.status(200).json({ comment: newComment }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -269,7 +269,7 @@ export const replyComment = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while replying comment" })
     }
 
-    return res.status(200).json(reply).end()
+    return res.status(200).json({ reply }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -288,7 +288,7 @@ export const getCommentsPerTask = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while fetching comments per task" })
     }
 
-    return res.status(200).json(comments).end()
+    return res.status(200).json({ comments }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)

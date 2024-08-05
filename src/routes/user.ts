@@ -1,25 +1,25 @@
 import express from 'express';
 
 import * as User from '../controllers/user';
-import { isAuthenticated, isProjectMember } from '../middlewares/authorization';
+import { isLoggedIn, isProjectMember } from '../middlewares/authorization';
 import { upload } from '../config/storage';
 import { handleValidationErrors, validateUpdateProfile } from '../middlewares/validator';
 
 export default (router: express.Router) => {
   router.get('/users', User.getAll);
-  router.get('/users/:userId/profile', isAuthenticated, User.getProfile)
-  router.put('/users/:userId/update-profile', upload('project-manager').single('profileImage'), isAuthenticated, validateUpdateProfile, handleValidationErrors, User.updateProfile)
-  router.delete('/users/:userId/delete-account', isAuthenticated, User.deleteUser)
+  router.get('/users/:userId/profile', isLoggedIn, User.getProfile)
+  router.put('/users/:userId/update-profile', upload('project-manager').single('profileImage'), isLoggedIn, validateUpdateProfile, handleValidationErrors, User.updateProfile)
+  router.delete('/users/:userId/delete-account', isLoggedIn, User.deleteUser)
   
   // Projects
-  router.get('/users/:userId/projects/role', isAuthenticated, User.getProjectsByRole)
-  router.get('/users/:userId/projects', isAuthenticated, User.getUserProjects)
+  router.get('/users/:userId/projects/role', isLoggedIn, User.getProjectsByRole)
+  router.get('/users/:userId/projects', isLoggedIn, User.getUserProjects)
   
   // Reminders
-  router.get('/users/:userId/reminders', isAuthenticated, User.getReminders)
-  router.delete('/users/:userId/reminders/delete/:reminderId', isAuthenticated, User.deleteReminder)
+  router.get('/users/:userId/reminders', isLoggedIn, User.getReminders)
+  router.delete('/users/:userId/reminders/delete/:reminderId', isLoggedIn, User.deleteReminder)
 
   // Tasks
-  router.get('/users/:userId/tasks', isAuthenticated, User.getUserTasks)
-  router.get('/users/:userId/tasks/:projectId', isProjectMember, User.getTasksPerProject)
+  router.get('/users/:userId/tasks', isLoggedIn, User.getUserTasks)
+  router.get('/users/:userId/tasks/:projectId', isLoggedIn, isProjectMember, User.getTasksPerProject)
 };

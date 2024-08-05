@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Types } from 'mongoose';
 
 import * as Project from '../services/project';
+import { getUserById } from '../services/user';
 
 export const getAll = async (req: Request, res: Response) => {
   try {
@@ -10,7 +11,7 @@ export const getAll = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while fetching all projects" })
     }
 
-    return res.status(200).json(projects).end()
+    return res.status(200).json({ projects }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -29,7 +30,7 @@ export const projectDetails = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while fetching project details" })
     }
 
-    return res.status(200).json(project).end()
+    return res.status(200).json({ project }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -77,7 +78,7 @@ export const updateProject = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while updating project details" })
     }
     
-    return res.status(200).json(project).end()
+    return res.status(200).json({ project }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -132,7 +133,7 @@ export const getAllMembers = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while fetching all project members" })
     }
 
-    return res.status(200).json(members).end()
+    return res.status(200).json({ members }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -156,7 +157,11 @@ export const getMembersByRole = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while fetching members by role" })
     }
 
-    return res.status(200).json(membersByRole).end()
+    if (role === 'admin') {
+      return res.status(200).json({ admins: membersByRole }).end()
+    } else if (role === 'member') {
+      return res.status(200).json({ members: membersByRole }).end()
+    }
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -170,12 +175,13 @@ export const addAdmin = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Invalid project ID or member ID" })
     }
 
+    const member = await getUserById(memberId)
     const updatedAdmins = await Project.addAdmin(projectId, memberId)
     if (!updatedAdmins) {
       return res.status(400).json({ error: "An error occured while adding new project admin" })
     }
 
-    return res.status(200).json(updatedAdmins).end()
+    return res.status(200).json({ message: `${member.username} is now an admin!`, admins: updatedAdmins }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -194,7 +200,7 @@ export const deleteMember = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while deleting member" })
     }
 
-    return res.status(200).json(updatedMembers).end()
+    return res.status(200).json({ members: updatedMembers }).end()
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
@@ -245,7 +251,11 @@ export const getProgress = async (req: Request, res: Response) => {
 
     const progress = await Project.getProgress(projectId)
 
-    return res.status(200).json({ progress: `${progress}%` }).end()
+    if (progress === 0) {
+      return res.status(200).json({ message: 'No tasks has been added to the project' }).end()
+    } else {
+      return res.status(200).json({ progress: `${progress}%` }).end()
+    }
   } catch (error) {
     console.log(error)
     return res.sendStatus(500)
