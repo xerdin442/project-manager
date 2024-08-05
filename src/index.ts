@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import connectMongoDBSession from 'connect-mongodb-session';
 import session from 'express-session';
 import dotenv from 'dotenv';
+import helmet from 'helmet';
 
 import router from './routes/index';
 import sessionDts from '../types/session';
@@ -20,6 +21,7 @@ app.use(cors({ credentials: true }))
 app.use(compression())
 app.use(bodyParser.json({ limit: "50mb" }))
 app.use(cookieParser())
+app.use(helmet())
 
 // Configure session middleware
 const MongoDBStore = connectMongoDBSession(session);
