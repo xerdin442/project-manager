@@ -38,10 +38,8 @@ export const register = async (req: Request, res: Response) => {
       { expiresIn: '3h' }
     )
 
-    // Add the authorization token to header and send a success message if registration is complete
-    return res.setHeader('Authorization', `BEARER ${token}`)
-      .status(200)
-      .json({ message: 'Registration successful!', user: user }).end()
+    // Send a success message and authorization token if registration is complete
+    return res.status(200).json({ message: 'Registration successful!', user: user, token }).end()
   } catch (error) {
     // Log and send an error message if any server errors are encountered
     console.log(error)
@@ -66,10 +64,8 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: '3h' }
     )
 
-    // Add the authorization token to header and send a success message if login is complete
-    return res.setHeader('Authorization', `BEARER ${token}`)
-      .status(200)
-      .json({ message: 'Login successful' }).end()
+    // Send a success message and authorization token if login is complete
+    return res.status(200).json({ message: 'Login successful', token }).end()
   } catch (error) {
     // Log and send an error message if any server errors are encountered
     console.log(error)

@@ -27,7 +27,7 @@ export const isLoggedIn = (req: Request, res: Response, next: NextFunction) => {
   } catch (error) {
     // Check if the token has expired and prompt the user to login
     if (error instanceof jwt.TokenExpiredError) {
-      return res.status(401).json({ error: "You are not logged in" });
+      return res.status(401).json({ error: "Your session has expired. Log in to continue" });
     } else {
       console.log(error)
       return res.sendStatus(500)
