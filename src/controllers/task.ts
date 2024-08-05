@@ -19,7 +19,7 @@ export const assignTask = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "An error occured while fetching member by ID" })
     }
 
-    const adminId = req.session.user._id
+    const adminId = req.session.user.id
     const isUrgent = /yes/i.test(urgent);
 
     const newTask = await Task.createTask({
@@ -79,7 +79,7 @@ export const submitTask = async (req: Request, res: Response) => {
     }
 
     const receiver = updatedTask.assignedBy._id.toString()
-    const sender = req.session.user._id.toString()
+    const sender = req.session.user.id
     const project = updatedTask.project._id.toString()
     const taskInfo = updatedTask.description.slice(0, 35)
     const message = `"${taskInfo}..."
@@ -111,7 +111,7 @@ export const approveTask = async (req: Request, res: Response) => {
     }
 
     const receiver = updatedTask.member._id.toString()
-    const sender = req.session.user._id.toString()
+    const sender = req.session.user.id
     const project = updatedTask.project._id.toString()
     const taskInfo = updatedTask.description.slice(0, 35)
     const message = `"${taskInfo}..."
@@ -143,7 +143,7 @@ export const rejectTask = async (req: Request, res: Response) => {
     }
 
     const receiver = updatedTask.member._id.toString()
-    const sender = req.session.user._id.toString()
+    const sender = req.session.user.id
     const project = updatedTask.project._id.toString()
     const taskInfo = updatedTask.description.slice(0, 35)
     const message = `"${taskInfo}..."
@@ -237,7 +237,7 @@ export const createComment = async (req: Request, res: Response) => {
 
     const { content } = req.body
     const newComment = await Task.createComment(taskId, {
-      user: req.session.user._id,
+      user: req.session.user.id,
       content
     })
 
@@ -261,7 +261,7 @@ export const replyComment = async (req: Request, res: Response) => {
 
     const { content } = req.body
     const reply = await Task.replyComment(commentId, {
-      user: req.session.user._id,
+      user: req.session.user.id,
       content
     })
 

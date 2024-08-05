@@ -1,10 +1,10 @@
 import 'express-session';
 
-import { IUser } from '../src/models/user'
+import { JwtPayload } from 'jsonwebtoken';
 
 declare module 'express-session' {
   interface SessionData {
-    user: IUser;
+    user: JwtPayload;
     email: string
   }
 }
