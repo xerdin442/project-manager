@@ -17,7 +17,7 @@ export default (router: express.Router) => {
   
   // Reminders
   router.get('/users/:userId/reminders', isLoggedIn, User.getReminders)
-  router.delete('/users/:userId/reminders/delete/:reminderId', isLoggedIn, User.deleteReminder)
+  router.delete('/users/:userId/reminders/:reminderId/delete', isLoggedIn, User.deleteReminder)
 
   // Tasks
   router.get('/users/:userId/tasks', isLoggedIn, User.getUserTasks)

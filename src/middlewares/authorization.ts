@@ -25,9 +25,9 @@ export const isLoggedIn = (req: Request, res: Response, next: NextFunction) => {
     req.session.user = payload as JwtPayload // Initialize a new session using the extracted payload data
     next()
   } catch (error) {
-    // Check if the error was caused by token expiration
+    // Check if the token has expired and prompt the user to login
     if (error instanceof jwt.TokenExpiredError) {
-      return res.status(401).json({ error: "Access denied. Token has expired!" });
+      return res.status(401).json({ error: "You are not logged in" });
     } else {
       console.log(error)
       return res.sendStatus(500)
