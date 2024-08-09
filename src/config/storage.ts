@@ -12,6 +12,9 @@ cloudinary.config({
 });
 
 export const upload = (folderName: string) => {
+  const imageMimetypes: string[] = ['image/png', 'image/heic', 'image/jpeg', 'image/webp', 'image/heif']
+
+  // Configure cloudinary storage options
   const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: (req, file) => {
@@ -28,8 +31,9 @@ export const upload = (folderName: string) => {
     }
   });
 
+  // Function to validate the format of the incoming file
   const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-    if (file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg') {
+    if (imageMimetypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
       cb(null, false);

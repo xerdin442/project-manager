@@ -52,7 +52,7 @@ export const updateProfile = async (req: Request, res: Response) => {
 
     const user = await User.updateProfile(userId, { username, email, profileImage })
     if (!user) {
-      return res.status(400).json({ error: "An error occured while creating new user" })
+      return res.status(400).json({ error: "An error occured while updating user profile" })
     }
   
     return res.status(200).json({ user }).end()
